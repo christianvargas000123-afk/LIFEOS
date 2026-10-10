@@ -1039,6 +1039,64 @@ function vProjects(){
     <div class="row between small"><span class="muted"><b class="num" style="color:var(--ink)">${pct}%</b> · ${l.filter(isDone).length} de ${l.length} tareas</span><span class="${dl<0?'':'faint'}" style="${dl<0?'color:var(--bad);font-weight:900':''}">${dl>=0?`Faltan ${dl} días`:'Fecha vencida'}</span></div>
     <div class="small muted">${ns?`Siguiente: <b style="color:var(--ink)">${esc(ns.titulo)}</b>${ns.fecha?` · ${relDay(ns.fecha)}`:''}`:l.length?'Todas las tareas están hechas.':'Aún sin tareas. Ábrelo para agregar la primera.'}</div></button>`}).join('')+'</div>';
 }
+/* ══════════════ panel de productividad ══════════════ */
+const dDone=t=>t.completedAt?iso(new Date(t.completedAt)):null;
+const pctColor=p=>p>=80?'var(--ok)':p>=60?'var(--warn)':'var(--bad)';
+function biData(){
+  const T=today(),tI=iso(T),done=S.tasks.filter(t=>isDone(t)&&t.completedAt),pend=pending();
+  const byDay={};done.forEach(t=>{const d=dDone(t);byDay[d]=(byDay[d]||0)+1});
+  let streak=0,d=byDay[tI]?T:addDays(T,-1);while(byDay[iso(d)]){streak++;d=addDays(d,-1)}
+  let best=0,run=0;for(let i=180;i>=0;i--){if(byDay[iso(addDays(T,-i))]){run++;best=Math.max(best,run)}else run=0}
+  const d14=[];for(let i=13;i>=0;i--){const x=addDays(T,-i);d14.push({l:i?String(x.getDate()):'Hoy',v:byDay[iso(x)]||0})}
+  const from56=iso(addDays(T,-55)),from30=iso(addDays(T,-29)),ws=iso(startOfWeek(T));
+  const wd=[0,0,0,0,0,0,0],bands=[0,0,0,0];
+  done.forEach(t=>{if(dDone(t)<from56)return;const c=new Date(t.completedAt),h=c.getHours();wd[(c.getDay()+6)%7]++;bands[h<6?3:h<12?0:h<18?1:2]++});
+  const DN=['lunes','martes','miércoles','jueves','viernes','sábado','domingo'],bw=Math.max(...wd);
+  const due30=done.filter(t=>t.fecha&&t.fecha>=from30&&t.fecha<=tI),onTime=due30.filter(t=>dDone(t)<=t.fecha).length;
+  const timed=done.filter(t=>dDone(t)>=from30&&t.est>0&&t.real>0);
+  return{
+    streak,best,d14,todayN:byDay[tI]||0,avg:sum(d14,x=>x.v)/14,bestDay:bw?DN[wd.indexOf(bw)]:null,bands,anyDone:done.length>0,
+    punct:due30.length?Math.round(onTime/due30.length*100):null,onTime,due30:due30.length,
+    postTotal:sum(live(),t=>t.postponed||0),postp:pend.filter(t=>(t.postponed||0)>=2).sort((a,b)=>b.postponed-a.postponed).slice(0,3),
+    areas:S.areas.map(a=>{const due=due30.filter(t=>t.areaId===a.id),mine=pend.filter(t=>t.areaId===a.id);
+      return{a,done:done.filter(t=>t.areaId===a.id&&dDone(t)>=from30).length,pend:mine.length,over:mine.filter(isOverdue).length,pt:due.length?Math.round(due.filter(t=>dDone(t)<=t.fecha).length/due.length*100):null}}),
+    est:sum(timed,t=>t.est),real:sum(timed,t=>t.real),timedN:timed.length,
+    tArea:S.areas.map(a=>{const l=timed.filter(t=>t.areaId===a.id);return{a,e:sum(l,t=>t.est),r:sum(l,t=>t.real)}}).filter(x=>x.e>0),
+    createdW:live().filter(t=>t.createdAt&&iso(new Date(t.createdAt))>=ws).length,doneW:done.filter(t=>dDone(t)>=ws).length,
+    nodate:pend.filter(t=>!t.fecha).length,forgot:pend.filter(t=>t.fecha&&t.fecha<iso(addDays(T,-3))).length
+  };
+}
+function vBI(){
+  const B=biData(),hh=x=>{const v=Math.round(x*10)/10;return(v%1?v.toFixed(1):String(v))+' h'};
+  const BL=['mañana','tarde','noche','madrugada'],bb=Math.max(...B.bands),bestBand=bb?BL[B.bands.indexOf(bb)]:null;
+  let h=`<div class="sec">Tu productividad</div>
+  <div class="grid2">
+   <div class="card kpi"><span class="l">Racha</span><span class="v num">${B.streak} ${B.streak===1?'día':'días'}</span><span class="d">${B.streak?`seguidos completando algo · récord ${B.best}`:'Completa una tarea hoy y empieza tu racha'}</span></div>
+   <div class="card kpi"><span class="l">Ritmo diario</span><span class="v num">${B.avg.toFixed(1)}</span><span class="d">tareas por día (últimos 14) · hoy ${B.todayN}</span></div>
+  </div>
+  <div class="card"><h3>Lo que completas cada día</h3><div class="tiny faint" style="margin-bottom:8px">Últimos 14 días${B.bestDay?` · tu mejor día suele ser el <b>${B.bestDay}</b>`:''}</div>${B.anyDone?'<canvas class="chart" id="cDays" style="height:160px" role="img" aria-label="Tareas completadas por día"></canvas>':'<div class="muted small">Cuando completes tareas verás aquí tu ritmo.</div>'}</div>`;
+  h+=`<div class="card stack"><span class="l eyebrow">Puntualidad · últimos 30 días</span>
+   ${B.punct==null?'<span class="muted small">Cuando completes tareas con fecha verás si las haces a tiempo.</span>':`<div class="row between"><b class="num" style="font:900 30px/1 var(--f-d);color:${pctColor(B.punct)}">${B.punct}%</b><span class="small muted">${B.onTime} de ${B.due30} a tiempo</span></div><div class="bar"><i style="width:${B.punct}%;background:${pctColor(B.punct)}"></i></div>`}
+   <span class="tiny faint">Tareas hechas el día que tocaba o antes. Has movido fechas a después ${B.postTotal} ${B.postTotal===1?'vez':'veces'}.</span>
+   ${B.postp.length?`<div class="stack" style="gap:6px;margin-top:6px"><b class="small">Las que más pospones</b>${B.postp.map(t=>`<button class="row between small" style="all:unset;display:flex;justify-content:space-between;gap:10px;cursor:pointer;padding:8px 0;border-top:1px solid var(--line)" data-a="task" data-id="${t.id}"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.titulo)}</span><b class="num" style="color:var(--bad)">${t.postponed}×</b></button>`).join('')}</div>`:''}
+  </div>`;
+  h+=`<div class="card stack"><h3>Por área</h3><div class="tiny faint" style="margin-top:-6px">Últimos 30 días</div>${B.areas.map(x=>`<div class="stack" style="gap:6px"><div class="row between small"><span class="row" style="gap:8px"><i class="dot" style="background:${x.a.color}"></i><b>${esc(x.a.nombre)}</b></span><span class="num muted">${x.done} hechas · ${x.pend} pend.${x.over?` · <b style="color:var(--bad)">${x.over} ${x.over===1?'vencida':'vencidas'}</b>`:''}</span></div><div class="bar"><i style="width:${x.pt==null?0:x.pt}%;background:${x.a.color}"></i></div><span class="tiny faint">${x.pt==null?'Sin tareas con fecha en este periodo':`${x.pt}% a tiempo`}</span></div>`).join('')}</div>`;
+  h+=`<div class="card stack"><h3>Tiempo planeado contra real</h3>${B.timedN<3?'<span class="muted small">Al completar una tarea, abre su detalle y usa los botones “+15 min real” para anotar cuánto te tomó de verdad. Con 3 o más verás si tus cálculos se quedan cortos.</span>':(()=>{const r=B.real/B.est,dif=Math.round(Math.abs(r-1)*100);return`<div class="row between"><b class="num" style="font:900 26px/1 var(--f-d)">${hh(B.real)}</b><span class="small muted">reales de ${hh(B.est)} planeadas</span></div><span class="small">${dif<10?'Calculas bien tus tiempos.':r>1?`Las cosas te toman <b>${dif}% más</b> de lo que planeas. Dale más margen a tu día.`:`Terminas <b>${dif}% antes</b> de lo que planeas.`}</span>${B.tArea.map(x=>`<div class="row between small"><span class="row" style="gap:8px"><i class="dot" style="background:${x.a.color}"></i>${esc(x.a.nombre)}</span><span class="num muted">${hh(x.r)} / ${hh(x.e)}</span></div>`).join('')}`})()}<span class="tiny faint">Últimos 30 días, tareas completadas con tiempo estimado.</span></div>`;
+  const sig=[];
+  if(B.forgot)sig.push({c:'var(--bad)',t:`${B.forgot} ${B.forgot===1?'tarea olvidada':'tareas olvidadas'}`,d:'Vencieron hace más de 3 días. Hazlas, cámbiales la fecha o bórralas.',a:'goTasks',v:'overdue',b:'Revisar'});
+  if(B.nodate)sig.push({c:'var(--warn)',t:`${B.nodate} sin fecha`,d:'Lo que no tiene fecha no te avisa y se pierde. Ponle un día.',a:'goTasks',v:'nodate',b:'Ponerles fecha'});
+  if(B.createdW>B.doneW+3)sig.push({c:'var(--warn)',t:`Anotas más de lo que cierras`,d:`Esta semana: ${B.createdW} nuevas y ${B.doneW} hechas. Elige 3 para hoy y lo demás muévelo.`,a:'goTasks',v:'pending',b:'Ver pendientes'});
+  h+=`<div class="card stack"><h3>Señales para no perder el hilo</h3>
+   ${sig.length?sig.map(s=>`<div class="row between" style="gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)"><div style="min-width:0"><b style="color:${s.c}">${esc(s.t)}</b><div class="small muted">${esc(s.d)}</div></div><button class="btn sm" data-a="${s.a}" data-v="${s.v}">${s.b}</button></div>`).join(''):'<span class="small" style="color:var(--ok)"><b>Todo en orden:</b> nada olvidado ni sin fecha.</span>'}
+   <div class="small" style="padding-top:10px;border-top:1px solid var(--line)">Esta semana: <b>${B.createdW}</b> anotadas · <b>${B.doneW}</b> hechas</div>
+   ${bestBand?`<div class="small">Completas más cosas en la <b>${bestBand}</b>. Pon ahí lo importante.</div><canvas class="chart" id="cBands" style="height:130px" role="img" aria-label="Tareas completadas por horario"></canvas>`:''}
+  </div>`;
+  return h;
+}
+function drawBI(){
+  const cd=$('#cDays');if(cd){const B=biData();drawBars(cd,B.d14.map(x=>x.l),B.d14.map(x=>x.v),'#2E4A3B')}
+  const cb=$('#cBands');if(cb){const B=biData();drawBars(cb,['Mañana','Tarde','Noche','Madrugada'],B.bands,'#B48E58')}
+}
 function vProgress(){
   const T=today(),tI=iso(T),ws=iso(startOfWeek(T));
   const due=live().filter(t=>t.fecha&&t.fecha>=ws&&t.fecha<=tI);
@@ -1056,8 +1114,7 @@ function vProgress(){
   <div class="card"><h3>Tareas completadas por semana</h3><div class="tiny faint" style="margin-bottom:8px">Últimas 6 semanas</div>${anyDone?'<canvas class="chart" id="cWeeks" style="height:180px" role="img" aria-label="Tareas completadas por semana"></canvas>':'<div class="muted small">Cuando completes tareas verás aquí tu ritmo semanal.</div>'}</div>`;
   const pg=[...S.goals.map(g=>({n:g.titulo,p:goalProgress(g).p,c:'var(--forest)',k:'Objetivo'})),...S.projects.map(p=>({n:p.nombre,p:projProgress(p).p,c:p.color,k:'Proyecto'}))];
   if(pg.length)h+=`<div class="card stack"><h3>Proyectos y objetivos</h3>${pg.map(x=>`<div class="stack" style="gap:6px"><div class="row between small"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span class="faint">${x.k} · </span>${esc(x.n)}</span><b class="num">${Math.round(x.p*100)}%</b></div><div class="bar"><i style="width:${x.p*100}%;background:${x.c}"></i></div></div>`).join('')}</div>`;
-  const timed=S.tasks.filter(t=>isDone(t)&&t.est>0&&t.real>0);
-  if(timed.length>=5)h+=`<details class="more"><summary>Tiempo planeado contra real</summary><div class="stack">${S.areas.map(a=>{const l=timed.filter(t=>t.areaId===a.id);if(!l.length)return'';const e=sum(l,t=>t.est),r=sum(l,t=>t.real);return`<div class="row between small"><span class="row" style="gap:8px"><i class="dot" style="background:${a.color}"></i>${esc(a.nombre)}</span><span class="num muted">${fmtH(e)} plan · ${fmtH(r)} real</span></div>`}).join('')}<span class="tiny faint">Basado en ${timed.length} tareas cerradas. Si no registras el tiempo real, se toma el planeado.</span></div></details>`;
+  h+=vBI();
   const sg=suggestions();
   if(sg.length)h+=`<div class="sec">Sugerencias <span class="n">${sg.length}</span></div><div class="stack">${sg.map(i=>`<div class="ins"><div style="flex:1;min-width:0"><b>${esc(i.title)}</b><div class="small muted">${esc(i.text)}</div><div class="row wrap" style="margin-top:10px"><button class="btn sm pri" data-a="sgApply" data-v="${esc(i.id)}">${esc(i.action)}</button><button class="btn sm" data-a="sgIgnore" data-v="${esc(i.id)}">Ocultar</button></div></div></div>`).join('')}</div>`;
   return h;
@@ -1073,6 +1130,7 @@ function drawBars(cv,labels,data,color){const{c,w,h}=cx(cv);const Tp=20,B=24,ch=
     c.fillStyle=css('--ink3');c.font='700 11px Figtree, system-ui, sans-serif';c.fillText(lb,x,h-7)})}
 function after(){requestAnimationFrame(()=>{
   const cw=$('#cWeeks');if(cw){const L=[],D=[];for(let i=5;i>=0;i--){const s=startOfWeek(addDays(today(),-7*i)),e=addDays(s,6);L.push(i?`${s.getDate()} ${MES[s.getMonth()]}`:'Esta');D.push(S.tasks.filter(t=>isDone(t)&&t.completedAt&&iso(new Date(t.completedAt))>=iso(s)&&iso(new Date(t.completedAt))<=iso(e)).length)}drawBars(cw,L,D,'#2E4A3B')}
+  drawBI();
   const g=$('#layer .gscroll');if(g&&!g.dataset.done){g.dataset.done=1;const t=$('.gtoday',g);if(t)g.scrollLeft=Math.max(0,parseFloat(t.style.left)-100)}
 })}
 
