@@ -312,17 +312,18 @@ var ZONA = 'America/Mexico_City';
 var APP_URL = 'https://christianvargas000123-afk.github.io/LIFEOS/';
 
 /* Abre la app. El diseño se descarga de tu página de GitHub, así recibes mejoras sin tocar este script. */
-function doGet() {
-  return HtmlService.createHtmlOutput(appHtml())
+function doGet(e) {
+  var fresh = !!(e && e.parameter && e.parameter.v); // ?v=1 fuerza descargar la versión más reciente
+  return HtmlService.createHtmlOutput(appHtml(fresh))
     .setTitle('LifeOS')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
     .setFaviconUrl(APP_URL + 'icon-192.png');
 }
 
-function appHtml() {
+function appHtml(fresh) {
   var cache = CacheService.getScriptCache();
   var meta = cache.get('app_n');
-  if (meta) {
+  if (meta && !fresh) {
     var parts = [];
     for (var i = 0; i < +meta; i++) parts.push(cache.get('app_' + i) || '');
     var cached = parts.join('');
@@ -331,7 +332,7 @@ function appHtml() {
   var html = UrlFetchApp.fetch(APP_URL + 'index.html?v=' + Date.now(), { muteHttpExceptions: true }).getContentText();
   var size = 90000, n = Math.ceil(html.length / size), put = { app_n: String(n) };
   for (var j = 0; j < n; j++) put['app_' + j] = html.slice(j * size, (j + 1) * size);
-  try { cache.putAll(put, 600); } catch (e) {}
+  try { cache.putAll(put, 300); } catch (e) {}
   return html;
 }
 
@@ -452,7 +453,10 @@ function deleteEv(r) {
   return {};
 }
 </script>
+<script>window.addEventListener("error",function(e){try{var d=document.getElementById("bootErr");if(!d){d=document.createElement("div");d.id="bootErr";document.body.insertBefore(d,document.body.firstChild)}d.style.cssText="position:fixed;left:8px;right:8px;top:8px;z-index:999;background:#9A3A3A;color:#fff;font:600 13px/1.4 system-ui;padding:10px 12px;border-radius:10px";d.textContent="Error de LifeOS: "+(e.message||"desconocido")+(e.lineno?" (linea "+e.lineno+")":"")}catch(_){}});</script>
 <script>
+(function(){
+
 /* ══════════════ LifeOS · edición simplificada ══════════════ */
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const uid=(p='id')=>p+'_'+Math.random().toString(36).slice(2,9);
@@ -1449,6 +1453,8 @@ window.addEventListener('offline',()=>{if(API.url)setSync('offline')});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&API.url){pull();gcLoad(false)}});
 setInterval(()=>{if(!document.hidden&&API.url){pull();gcLoad(false)}},120000);
 if('serviceWorker' in navigator&&location.protocol==='https:'&&!GAS)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+
+})();
 </script>
 </body>
 </html>

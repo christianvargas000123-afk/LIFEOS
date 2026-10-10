@@ -15,17 +15,18 @@ var ZONA = 'America/Mexico_City';
 var APP_URL = 'https://christianvargas000123-afk.github.io/LIFEOS/';
 
 /* Abre la app. El diseño se descarga de tu página de GitHub, así recibes mejoras sin tocar este script. */
-function doGet() {
-  return HtmlService.createHtmlOutput(appHtml())
+function doGet(e) {
+  var fresh = !!(e && e.parameter && e.parameter.v); // ?v=1 fuerza descargar la versión más reciente
+  return HtmlService.createHtmlOutput(appHtml(fresh))
     .setTitle('LifeOS')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
     .setFaviconUrl(APP_URL + 'icon-192.png');
 }
 
-function appHtml() {
+function appHtml(fresh) {
   var cache = CacheService.getScriptCache();
   var meta = cache.get('app_n');
-  if (meta) {
+  if (meta && !fresh) {
     var parts = [];
     for (var i = 0; i < +meta; i++) parts.push(cache.get('app_' + i) || '');
     var cached = parts.join('');
@@ -34,7 +35,7 @@ function appHtml() {
   var html = UrlFetchApp.fetch(APP_URL + 'index.html?v=' + Date.now(), { muteHttpExceptions: true }).getContentText();
   var size = 90000, n = Math.ceil(html.length / size), put = { app_n: String(n) };
   for (var j = 0; j < n; j++) put['app_' + j] = html.slice(j * size, (j + 1) * size);
-  try { cache.putAll(put, 600); } catch (e) {}
+  try { cache.putAll(put, 300); } catch (e) {}
   return html;
 }
 
