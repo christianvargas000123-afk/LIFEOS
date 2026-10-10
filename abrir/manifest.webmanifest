@@ -3,7 +3,7 @@
   "short_name": "LifeOS",
   "start_url": "./?home",
   "scope": "./",
-  "display": "browser",
+  "display": "standalone",
   "background_color": "#ECE6DA",
   "theme_color": "#ECE6DA",
   "icons": [
