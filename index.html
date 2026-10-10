@@ -624,10 +624,11 @@ const GC_MSG={
   offline:'Sin internet. Tus cambios se guardan aquí y se envían al reconectar.',
   unauthorized:'La clave no coincide con tu script. Vuelve a copiar el código del script desde Ajustes.',
   stale:'Google no respondió. Muestro lo último que cargó.',
+  access:'Tu script no tiene acceso público. En script.google.com ve a Implementar → Gestionar implementaciones → lápiz (editar) → “Quién tiene acceso”: Cualquier usuario → Versión: Nueva versión → Implementar. La dirección no cambia; luego toca “Probar conexión”.',
 };
 function gcSetConfigured(){mcp=API.url?true:null;if(!mcp)gcState='unavailable'}
 const gcReady=()=>!!mcp&&gcState==='ok';
-const gcNeedsAllow=()=>['stale','offline','unauthorized'].includes(gcState);
+const gcNeedsAllow=()=>['stale','offline','unauthorized','access'].includes(gcState);
 const dayLink=f=>{const d=parseISO(f);return`https://calendar.google.com/calendar/r/day/${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`};
 function gcRange(){
   const a=parseISO(U.calDate),gs=startOfWeek(startOfMonth(a)),ge=addDays(gs,41);
@@ -650,7 +651,12 @@ async function gcAllow(){
   if(!API.url){openSheet('settings');return}
   gcState='loading';renderTop();if(SH)renderSheet();
   try{const r=await api('ping');toast('Conectado con Google',`Calendario: ${r.calendar||'principal'}`,'ok');await gcLoad(true);pull()}
-  catch(e){gcState=e.code==='unauthorized'?'unauthorized':isNet(e.code)?'offline':'stale';gcErr=e.message;toast('No se pudo conectar',e.message,'warn')}
+  catch(e){
+    /* Con internet, un fallo de red al conectar casi siempre es el acceso de la implementación: Google redirige al inicio de sesión y el navegador bloquea la respuesta */
+    if(e.code==='network'&&navigator.onLine){gcState='access';gcErr=GC_MSG.access}
+    else{gcState=e.code==='unauthorized'?'unauthorized':isNet(e.code)?'offline':'stale';gcErr=e.message}
+    toast('No se pudo conectar',gcErr,'warn');
+  }
   renderTop();renderView();if(SH)renderSheet();
 }
 const ownEvent=id=>S.tasks.some(t=>t.gcalId&&(id===t.gcalId||id.startsWith(t.gcalId+'_')));
@@ -1235,7 +1241,7 @@ function shSettings(){
     `<ol class="steps" style="margin:4px 0 6px">
       <li><span>Toca <b>Copiar código del script</b>. Ya trae tu clave personal.<br><button class="btn sm navy" style="margin-top:8px" data-a="copyScript">Copiar código del script</button></span></li>
       <li><span>Abre <a href="https://script.google.com/home/projects/create" target="_blank" rel="noopener" style="color:var(--navy);font-weight:900">script.google.com</a> con tu cuenta de Google. Borra lo que trae, pega el código y guarda (ícono de disco).</span></li>
-      <li><span>Toca <b>Implementar → Nueva implementación</b>. En el engrane elige <b>Aplicación web</b>. Ejecutar como: <b>Yo</b>. Quién tiene acceso: <b>Cualquier usuario</b>. Toca <b>Implementar</b> y autoriza con tu cuenta (si Google advierte que la app no está verificada: Configuración avanzada → Ir a LifeOS).</span></li>
+      <li><span>Toca <b>Implementar → Nueva implementación</b>. En el engrane elige <b>Aplicación web</b> (no Biblioteca). Ejecutar como: <b>Yo</b>. Quién tiene acceso: <b>Cualquier usuario</b> (no “Solo yo” ni “con cuenta de Google”). Toca <b>Implementar</b> y autoriza con tu cuenta (si Google advierte que la app no está verificada: Configuración avanzada → Ir a LifeOS).</span></li>
       <li><span>Copia la <b>URL de la aplicación web</b> (termina en <b>/exec</b>) y pégala aquí:</span></li>
     </ol>
     <label class="sr" for="apiUrl">URL de la aplicación web o código de conexión</label><input type="text" id="apiUrl" inputmode="url" autocomplete="off" placeholder="https://script.google.com/macros/s/…/exec">
@@ -1370,7 +1376,7 @@ document.addEventListener('click',e=>{
     case'pdel':if(arm('pdel')){S.deleted[id]=Date.now();S.projects=S.projects.filter(x=>x.id!==id);S.tasks.forEach(x=>{if(x.proyectoId===id){x.proyectoId=null;x.updatedAt=new Date().toISOString()}});save();closeSheet();render()}break;
     case'sgApply':{const i=suggestions().find(x=>x.id===v);if(i){i.run();save();renderView()}break}
     case'sgIgnore':U.ignored=[...(U.ignored||[]),v];saveU();renderView();break;
-    case'apiSave':{const i=$('#apiUrl');const raw=(i&&i.value||'').trim();const [u,k]=raw.split('|').map(x=>(x||'').trim());if(!/^https:\/\/script\.google(usercontent)?\.com\/.+/.test(u)){toast('Esa no es la dirección del script','Debe empezar con https://script.google.com/macros/s/ y terminar en /exec','warn');break}API.url=u;if(k)API.key=k;saveAPI();setRemoteTs(0);gcSetConfigured();syncState='pending';renderSheet();gcAllow();break}
+    case'apiSave':{const i=$('#apiUrl');const raw=(i&&i.value||'').trim();const [u,k]=raw.split('|').map(x=>(x||'').trim());if(/\/macros\/library\//.test(u)){toast('Esa es la dirección de una Biblioteca','Necesitas la de Aplicación web: Implementar → Nueva implementación → engrane → Aplicación web. Termina en /exec.','warn');break}if(/\/dev$/.test(u)){toast('Esa es la dirección de prueba (/dev)','Usa la URL de la Aplicación web que termina en /exec.','warn');break}if(!/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(u)){toast('Esa no es la dirección del script','Debe empezar con https://script.google.com/macros/s/ y terminar en /exec','warn');break}API.url=u;if(k)API.key=k;saveAPI();setRemoteTs(0);gcSetConfigured();syncState='pending';renderSheet();gcAllow();break}
     case'apiReset':if(arm('apiReset')){API.url='';saveAPI();gcSetConfigured();gcEvents=[];setSync('off');renderAll()}break;
     case'copyScript':copyText(gsCode(),'Código copiado. Pégalo en script.google.com');break;
     case'copyLink':copyText(API.url+'|'+API.key,'Código de conexión copiado');break;
