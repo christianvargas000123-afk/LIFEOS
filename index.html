@@ -296,41 +296,53 @@ details.more>div{padding:0 14px 14px}
 
 <script type="text/plain" id="gsTemplate">
 /**
- * LifeOS · puente con Google Calendar y almacenamiento de tus datos.
+ * LifeOS · tu app privada con Google Calendar.
  *
- * Cómo instalarlo (también aparece dentro de LifeOS → Ajustes):
- * 1. En LifeOS toca "Copiar código del script". Ese código ya trae tu clave personal.
- * 2. Abre https://script.google.com, crea un proyecto nuevo y pega el código.
- * 3. Implementar → Nueva implementación → Aplicación web.
- *    Ejecutar como: Yo. Quién tiene acceso: Cualquier usuario.
- * 4. Autoriza con tu cuenta y pega la URL de la aplicación web en LifeOS.
+ * Instalación (una sola vez):
+ * 1. Pega este código en tu proyecto de https://script.google.com y guarda.
+ * 2. Implementar → Nueva implementación → engrane → Aplicación web.
+ *    Ejecutar como: Yo.   Quién tiene acceso: Solo yo.
+ * 3. Autoriza con tu cuenta y abre la URL que termina en /exec: esa es tu LifeOS.
  *
- * Este script solo usa tu Google Calendar y su propio almacenamiento privado.
- * Sin la clave correcta no responde nada.
+ * Privacidad: con "Solo yo", Google exige tu sesión para abrir la app o llamar
+ * a este script. Nadie más puede entrar. El script solo usa tu Google Calendar,
+ * su propio almacenamiento privado y descarga el diseño de la app desde GitHub.
  */
-var CLAVE = '__CLAVE__';
 var ZONA = 'America/Mexico_City';
+var APP_URL = 'https://christianvargas000123-afk.github.io/LIFEOS/';
 
-function doPost(e) {
-  var req = {};
-  try { req = JSON.parse((e && e.postData && e.postData.contents) || '{}'); }
-  catch (err) { return out({ ok: false, code: 'bad_request', error: 'Solicitud inválida' }); }
-  if (!req.key || req.key !== CLAVE) return out({ ok: false, code: 'unauthorized', error: 'La clave no coincide' });
-  var fn = ACTIONS[req.action];
-  if (!fn) return out({ ok: false, code: 'bad_request', error: 'Acción desconocida' });
-  try {
-    var res = fn(req) || {};
-    res.ok = true;
-    return out(res);
-  } catch (err) {
-    return out({ ok: false, code: 'server', error: String((err && err.message) || err) });
-  }
+/* Abre la app. El diseño se descarga de tu página de GitHub, así recibes mejoras sin tocar este script. */
+function doGet() {
+  return HtmlService.createHtmlOutput(appHtml())
+    .setTitle('LifeOS')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
+    .addMetaTag('apple-mobile-web-app-title', 'LifeOS')
+    .setFaviconUrl(APP_URL + 'icon-192.png');
 }
 
-function doGet() { return out({ ok: true, app: 'LifeOS' }); }
+function appHtml() {
+  var cache = CacheService.getScriptCache();
+  var meta = cache.get('app_n');
+  if (meta) {
+    var parts = [];
+    for (var i = 0; i < +meta; i++) parts.push(cache.get('app_' + i) || '');
+    var cached = parts.join('');
+    if (cached.length) return cached;
+  }
+  var html = UrlFetchApp.fetch(APP_URL + 'index.html?v=' + Date.now(), { muteHttpExceptions: true }).getContentText();
+  var size = 90000, n = Math.ceil(html.length / size), put = { app_n: String(n) };
+  for (var j = 0; j < n; j++) put['app_' + j] = html.slice(j * size, (j + 1) * size);
+  try { cache.putAll(put, 600); } catch (e) {}
+  return html;
+}
 
-function out(o) {
-  return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
+/* La app llama aquí con google.script.run. Solo funciona para quien puede abrir la app: tú. */
+function handle(req) {
+  var fn = ACTIONS[req && req.action];
+  if (!fn) return { ok: false, code: 'bad_request', error: 'Acción desconocida' };
+  var res = fn(req) || {};
+  res.ok = true;
+  return res;
 }
 
 var ACTIONS = {
@@ -552,20 +564,24 @@ try{API=Object.assign(API,JSON.parse(localStorage.getItem(AKEY)||'{}'))}catch(e)
 function genKey(){const a=new Uint8Array(20);crypto.getRandomValues(a);const c='abcdefghjkmnpqrstuvwxyz23456789';return Array.from(a,b=>c[b%c.length]).join('')}
 function saveAPI(){try{localStorage.setItem(AKEY,JSON.stringify(API))}catch(e){}}
 if(!API.key){API.key=genKey();saveAPI()}
+/* Abierta desde tu script privado ("Solo yo"): habla con Google directamente, sin URL ni clave */
+const GAS=!!(typeof google==='object'&&google&&google.script&&google.script.run);
+if(GAS)API.url='gas';
+else if(API.url){API.url='';saveAPI()} /* el modo de script público ya no se usa */
 const getRemoteTs=()=>{try{return +localStorage.getItem(RKEY)||0}catch(e){return 0}};
 const setRemoteTs=v=>{try{localStorage.setItem(RKEY,String(v||0))}catch(e){}};
 const isNet=c=>c==='offline'||c==='network'||c==='timeout';
 async function api(action,payload={},timeout=30000){
-  if(!API.url)throw{code:'unconfigured',message:'Google no está conectado. Ve a Ajustes → Conectar con Google.'};
+  if(!API.url)throw{code:'unconfigured',message:'Google no está conectado. Ve a Ajustes para crear tu LifeOS privada.'};
   if(!navigator.onLine)throw{code:'offline',message:'Sin internet.'};
-  const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),timeout);
-  let r;
-  try{r=await fetch(API.url,{method:'POST',body:JSON.stringify(Object.assign({key:API.key,action},payload)),signal:ctl.signal,redirect:'follow'})}
-  catch(e){throw{code:e&&e.name==='AbortError'?'timeout':'network',message:'Google no respondió. Revisa tu conexión.'}}
-  finally{clearTimeout(tm)}
-  let j;try{j=await r.json()}catch(e){throw{code:'bad_response',message:'Esa dirección no responde como tu script de LifeOS. Revisa que sea la URL de la aplicación web (termina en /exec) y que el acceso sea “Cualquier usuario”.'}}
-  if(!j.ok)throw{code:j.code||'server',message:j.code==='unauthorized'?'La clave no coincide. Vuelve a copiar el código del script desde Ajustes y crea una nueva implementación.':(j.error||'Error en el script.')};
-  return j;
+  if(GAS)return new Promise((res,rej)=>{
+    const tm=setTimeout(()=>rej({code:'timeout',message:'Google tardó en responder.'}),timeout);
+    google.script.run
+      .withSuccessHandler(r=>{clearTimeout(tm);if(r&&r.ok===false)rej({code:r.code||'server',message:r.error||'Error en el script.'});else res(r||{})})
+      .withFailureHandler(e=>{clearTimeout(tm);rej({code:navigator.onLine?'server':'offline',message:String((e&&e.message)||e)})})
+      .handle(Object.assign({action},payload));
+  });
+  throw{code:'unconfigured',message:GC_MSG.access};
 }
 
 /* ══════════════ sincronización entre dispositivos ══════════════ */
@@ -624,7 +640,7 @@ const GC_MSG={
   offline:'Sin internet. Tus cambios se guardan aquí y se envían al reconectar.',
   unauthorized:'La clave no coincide con tu script. Vuelve a copiar el código del script desde Ajustes.',
   stale:'Google no respondió. Muestro lo último que cargó.',
-  access:'Tu script no tiene acceso público. En script.google.com ve a Implementar → Gestionar implementaciones → lápiz (editar) → “Quién tiene acceso”: Cualquier usuario → Versión: Nueva versión → Implementar. La dirección no cambia; luego toca “Probar conexión”.',
+  access:'No se pudo conectar con tu script. Abre LifeOS desde la dirección de tu script (termina en /exec) con tu sesión de Google iniciada.',
 };
 function gcSetConfigured(){mcp=API.url?true:null;if(!mcp)gcState='unavailable'}
 const gcReady=()=>!!mcp&&gcState==='ok';
@@ -1226,7 +1242,7 @@ function shArea(){const d=SH.d;return shHead('Nueva','Área de vida')+blk('Nombr
 function healthBanner(){
   const out=[];
   if(!storageOK)out.push(['red','<b>Este navegador no guarda datos.</b> Puede ser una ventana privada. Abre LifeOS en una ventana normal o instálalo en tu pantalla de inicio.']);
-  if(!API.url)out.push(['blue',`<b>Conecta Google</b> para recibir avisos en tu Google Calendar y ver lo mismo en el iPhone y la computadora. <button class="link" data-a="settings">Conectar ahora</button>`]);
+  if(!API.url)out.push(['blue',`<b>Crea tu LifeOS privada con Google</b> para recibir avisos en tu Google Calendar y ver lo mismo en el iPhone y la computadora. Solo tú podrás abrirla. <button class="link" data-a="settings">Cómo hacerlo</button>`]);
   else if(syncState==='offline')out.push(['','<b>Sin internet.</b> Tus cambios se guardan en este dispositivo y se envían en cuanto vuelva la conexión.']);
   else if(syncState==='unauthorized')out.push(['red','<b>La clave no coincide con tu script.</b> Ve a Ajustes, copia de nuevo el código del script y vuelve a implementarlo.']);
   else if(syncState==='error')out.push(['red',`<b>No se pudo sincronizar.</b> ${esc(syncErr||'')} Tus cambios siguen en este dispositivo y se reintentará solo.`]);
@@ -1237,22 +1253,20 @@ function shSettings(){
   const s=S.settings;
   const syncTxt={off:'Sin conectar: todo se guarda solo en este dispositivo.',pending:'Sincronizando…',cloud:'Sincronizado con tu Google. Ves lo mismo en todos tus dispositivos.',offline:'Sin internet. Se sincroniza al reconectar.',error:'No se pudo sincronizar: '+(syncErr||''),unauthorized:'La clave no coincide con tu script.',big:'Tus datos superan el límite de sincronización.'}[syncState]||'';
   const code=gsCode();
-  const google=!API.url?
+  const google=GAS?
+    `<div class="note ${gcState==='ok'?'blue':gcState==='loading'?'':'red'}">${gcState==='ok'?`<b>Tu LifeOS privada.</b> Solo tú puedes abrirla con tu cuenta de Google. ${gcEvents.length} eventos cargados.`:esc(gcState==='loading'?GC_MSG.loading:(gcErr||GC_MSG[gcState]||''))}</div>
+     <button class="btn sm navy" data-a="gcAllow">Probar conexión</button>`
+   :!API.url?
     `<ol class="steps" style="margin:4px 0 6px">
-      <li><span>Toca <b>Copiar código del script</b>. Ya trae tu clave personal.<br><button class="btn sm navy" style="margin-top:8px" data-a="copyScript">Copiar código del script</button></span></li>
-      <li><span>Abre <a href="https://script.google.com/home/projects/create" target="_blank" rel="noopener" style="color:var(--navy);font-weight:900">script.google.com</a> con tu cuenta de Google. Borra lo que trae, pega el código y guarda (ícono de disco).</span></li>
-      <li><span>Toca <b>Implementar → Nueva implementación</b>. En el engrane elige <b>Aplicación web</b> (no Biblioteca). Ejecutar como: <b>Yo</b>. Quién tiene acceso: <b>Cualquier usuario</b> (no “Solo yo” ni “con cuenta de Google”). Toca <b>Implementar</b> y autoriza con tu cuenta (si Google advierte que la app no está verificada: Configuración avanzada → Ir a LifeOS).</span></li>
-      <li><span>Copia la <b>URL de la aplicación web</b> (termina en <b>/exec</b>) y pégala aquí:</span></li>
+      <li><span>Toca <b>Copiar código del script</b>.<br><button class="btn sm navy" style="margin-top:8px" data-a="copyScript">Copiar código del script</button></span></li>
+      <li><span>Abre <a href="https://script.google.com/home" target="_blank" rel="noopener" style="color:var(--navy);font-weight:900">script.google.com</a>, entra a tu proyecto (o crea uno nuevo), borra todo el código, pega el nuevo y guarda (ícono de disco).</span></li>
+      <li><span>Toca <b>Implementar → Nueva implementación</b> → engrane → <b>Aplicación web</b>. Ejecutar como: <b>Yo</b>. Quién tiene acceso: <b>Solo yo</b>. Toca <b>Implementar</b> y autoriza con tu cuenta.</span></li>
+      <li><span>Abre la <b>URL de la aplicación web</b> (termina en <b>/exec</b>). <b>Esa es tu LifeOS privada</b>: úsala desde ahí y guárdala en favoritos o en tu pantalla de inicio.</span></li>
     </ol>
-    <label class="sr" for="apiUrl">URL de la aplicación web o código de conexión</label><input type="text" id="apiUrl" inputmode="url" autocomplete="off" placeholder="https://script.google.com/macros/s/…/exec">
-    <div class="tiny faint">¿Ya lo conectaste en otro dispositivo? Pega aquí su <b>código de conexión</b> (Ajustes → Conectar otro dispositivo) y salta los pasos 1 a 3.</div>
-    <button class="btn pri block" data-a="apiSave">Conectar</button>
-    <details class="more"><summary>Ver el código del script</summary><div><textarea readonly id="gsCodeBox" style="min-height:160px;font:600 11px/1.4 ui-monospace,Menlo,monospace" aria-label="Código del script">${esc(code)}</textarea></div></details>`
-   :`<div class="note ${gcState==='ok'?'blue':gcState==='loading'?'':'red'}">${gcState==='ok'?`Conectado · ${gcEvents.length} eventos cargados${gcStored?` · actualizado a las ${new Date(gcStored).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})}`:''}.`:esc(gcState==='loading'?GC_MSG.loading:(gcErr||GC_MSG[gcState]||''))}</div>
-    <div class="row wrap"><button class="btn sm navy" data-a="gcAllow">Probar conexión</button><button class="btn sm ${SH.d.arm==='apiReset'?'danger armed':''}" data-a="apiReset">${SH.d.arm==='apiReset'?'Toca otra vez para desconectar':'Desconectar'}</button></div>
-    <details class="more"><summary>Conectar otro dispositivo</summary><div class="stack"><span class="small muted">Copia este código y pégalo en Ajustes → Conectar del otro dispositivo (iPhone, computadora o la app instalada). Es como una contraseña: no lo compartas.</span><button class="btn sm navy" data-a="copyLink">Copiar código de conexión</button></div></details>`;
+    <div class="note">Si ya usaste esta página, toca <b>Exportar respaldo</b> abajo y luego <b>Importar respaldo</b> dentro de tu LifeOS privada para llevarte tus tareas.</div>
+    <details class="more"><summary>Ver el código del script</summary><div><textarea readonly id="gsCodeBox" style="min-height:160px;font:600 11px/1.4 ui-monospace,Menlo,monospace" aria-label="Código del script">${esc(code)}</textarea></div></details>`:'';
   return shHead('Ajustes','LifeOS')+
-  blk('Conectar con Google',google,API.url?'Tu script solo puede usar tu Google Calendar y su propio almacenamiento. Nadie más puede usarlo sin tu clave.':'Unos 5 minutos, una sola vez. Los avisos llegan por la app de Google Calendar.')+
+  blk('Conectar con Google',google,GAS?'Tu script solo puede usar tu Google Calendar y su propio almacenamiento. Con acceso “Solo yo”, nadie más puede abrirlo.':'Unos 5 minutos, una sola vez. Los avisos llegan por la app de Google Calendar.')+
   (API.url?blk('Avisos',`<button class="switch ${s.gcal?'on':''}" data-a="sToggle" data-k="gcal" aria-pressed="${!!s.gcal}"><span><b style="display:block">Proponer aviso al crear tareas</b><span class="tiny muted">Las tareas con hora (o sin hora a partir de mañana) se agendan con aviso</span></span><span class="s"></span></button>
    <div class="tiny faint">Aviso para tareas con hora</div>
    <div class="chips">${[[0,'A la hora'],[10,'10 min antes'],[30,'30 min antes'],[60,'1 h antes']].map(([v,l])=>chip(l,+s.remind===v,`data-a="sSet" data-k="remind" data-v="${v}"`)).join('')}</div>`,'Activa las notificaciones de la app Google Calendar en tu iPhone.'):'')+
@@ -1267,7 +1281,7 @@ function shWelcome(){
   return`<div style="text-align:center;margin-bottom:16px"><div class="mark" style="width:64px;height:64px;font-size:32px;border-radius:20px;margin:4px auto 14px">L</div><h2 id="shT">Bienvenido a LifeOS</h2>
    <p class="muted" style="margin:8px 0 0;font-size:15px">Anota lo que tienes que hacer, organiza tu día y recibe avisos con Google Calendar.</p></div>
    <ol class="steps" style="margin-bottom:16px">
-    <li><span><b>Conecta Google</b> en Ajustes para tener avisos y sincronizar tus dispositivos.</span></li>
+    ${GAS?'':'<li><span><b>Crea tu LifeOS privada</b> en Ajustes para tener avisos y sincronizar tus dispositivos.</span></li>'}
     <li><span><b>Escribe en Hoy</b> algo como “Pagar luz el 6 de noviembre” y toca Añadir.</span></li>
     <li><span><b>Toca el círculo</b> de una tarea para completarla.</span></li>
    </ol>
@@ -1276,12 +1290,11 @@ function shWelcome(){
 function shInstall(){
   return shHead('iPhone','Agregar a tu pantalla de inicio')+
   `<ol class="steps" style="margin-bottom:16px">
-   <li><span>Abre esta página en <b>Safari</b>.</span></li>
-   <li><span>Toca el botón <b>Compartir</b>, el cuadro con la flecha hacia arriba.</span></li>
-   <li><span>Elige <b>Agregar a pantalla de inicio</b> y toca <b>Agregar</b>.</span></li>
+   <li><span>En el iPhone abre <b>Safari</b> con tu sesión de Google iniciada (la misma cuenta del calendario).</span></li>
+   <li><span>Abre la dirección de <b>tu LifeOS privada</b>, la de tu script que termina en <b>/exec</b>. Puedes mandártela por WhatsApp o correo desde la computadora.</span></li>
+   <li><span>Toca <b>Compartir</b> → <b>Agregar a pantalla de inicio</b> → <b>Agregar</b>.</span></li>
   </ol>
-  <div class="note blue" style="margin-bottom:10px">Se instala como app con su propio ícono, abre a pantalla completa y funciona sin internet. Lo que hagas sin conexión se envía a Google al reconectar.</div>
-  <div class="note" style="margin-bottom:16px">La app instalada guarda sus datos aparte de Safari. Ábrela, ve a Ajustes → Conectar con Google y pega el <b>código de conexión</b> que copias desde otro dispositivo ya conectado. Tus tareas aparecen solas.</div>
+  <div class="note blue" style="margin-bottom:16px">Queda un ícono en tu pantalla de inicio que abre tu LifeOS en Safari. Como el acceso es “Solo yo”, Google te pedirá tu sesión si no la tienes iniciada; nadie más puede entrar.</div>
   <button class="btn pri block" data-a="close">Entendido</button>`;
 }
 function gsCode(){const el=document.getElementById('gsTemplate');return el?el.textContent.trim().replace('__CLAVE__',API.key):''}
@@ -1436,7 +1449,7 @@ window.addEventListener('online',()=>{if(API.url){pull();gcLoad(true)}});
 window.addEventListener('offline',()=>{if(API.url)setSync('offline')});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&API.url){pull();gcLoad(false)}});
 setInterval(()=>{if(!document.hidden&&API.url){pull();gcLoad(false)}},120000);
-if('serviceWorker' in navigator&&location.protocol==='https:')window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+if('serviceWorker' in navigator&&location.protocol==='https:'&&!GAS)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 </script>
 </body>
 </html>

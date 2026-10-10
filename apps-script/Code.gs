@@ -1,39 +1,51 @@
 /**
- * LifeOS · puente con Google Calendar y almacenamiento de tus datos.
+ * LifeOS · tu app privada con Google Calendar.
  *
- * Cómo instalarlo (también aparece dentro de LifeOS → Ajustes):
- * 1. En LifeOS toca "Copiar código del script". Ese código ya trae tu clave personal.
- * 2. Abre https://script.google.com, crea un proyecto nuevo y pega el código.
- * 3. Implementar → Nueva implementación → Aplicación web.
- *    Ejecutar como: Yo. Quién tiene acceso: Cualquier usuario.
- * 4. Autoriza con tu cuenta y pega la URL de la aplicación web en LifeOS.
+ * Instalación (una sola vez):
+ * 1. Pega este código en tu proyecto de https://script.google.com y guarda.
+ * 2. Implementar → Nueva implementación → engrane → Aplicación web.
+ *    Ejecutar como: Yo.   Quién tiene acceso: Solo yo.
+ * 3. Autoriza con tu cuenta y abre la URL que termina en /exec: esa es tu LifeOS.
  *
- * Este script solo usa tu Google Calendar y su propio almacenamiento privado.
- * Sin la clave correcta no responde nada.
+ * Privacidad: con "Solo yo", Google exige tu sesión para abrir la app o llamar
+ * a este script. Nadie más puede entrar. El script solo usa tu Google Calendar,
+ * su propio almacenamiento privado y descarga el diseño de la app desde GitHub.
  */
-var CLAVE = '__CLAVE__';
 var ZONA = 'America/Mexico_City';
+var APP_URL = 'https://christianvargas000123-afk.github.io/LIFEOS/';
 
-function doPost(e) {
-  var req = {};
-  try { req = JSON.parse((e && e.postData && e.postData.contents) || '{}'); }
-  catch (err) { return out({ ok: false, code: 'bad_request', error: 'Solicitud inválida' }); }
-  if (!req.key || req.key !== CLAVE) return out({ ok: false, code: 'unauthorized', error: 'La clave no coincide' });
-  var fn = ACTIONS[req.action];
-  if (!fn) return out({ ok: false, code: 'bad_request', error: 'Acción desconocida' });
-  try {
-    var res = fn(req) || {};
-    res.ok = true;
-    return out(res);
-  } catch (err) {
-    return out({ ok: false, code: 'server', error: String((err && err.message) || err) });
-  }
+/* Abre la app. El diseño se descarga de tu página de GitHub, así recibes mejoras sin tocar este script. */
+function doGet() {
+  return HtmlService.createHtmlOutput(appHtml())
+    .setTitle('LifeOS')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover')
+    .addMetaTag('apple-mobile-web-app-title', 'LifeOS')
+    .setFaviconUrl(APP_URL + 'icon-192.png');
 }
 
-function doGet() { return out({ ok: true, app: 'LifeOS' }); }
+function appHtml() {
+  var cache = CacheService.getScriptCache();
+  var meta = cache.get('app_n');
+  if (meta) {
+    var parts = [];
+    for (var i = 0; i < +meta; i++) parts.push(cache.get('app_' + i) || '');
+    var cached = parts.join('');
+    if (cached.length) return cached;
+  }
+  var html = UrlFetchApp.fetch(APP_URL + 'index.html?v=' + Date.now(), { muteHttpExceptions: true }).getContentText();
+  var size = 90000, n = Math.ceil(html.length / size), put = { app_n: String(n) };
+  for (var j = 0; j < n; j++) put['app_' + j] = html.slice(j * size, (j + 1) * size);
+  try { cache.putAll(put, 600); } catch (e) {}
+  return html;
+}
 
-function out(o) {
-  return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
+/* La app llama aquí con google.script.run. Solo funciona para quien puede abrir la app: tú. */
+function handle(req) {
+  var fn = ACTIONS[req && req.action];
+  if (!fn) return { ok: false, code: 'bad_request', error: 'Acción desconocida' };
+  var res = fn(req) || {};
+  res.ok = true;
+  return res;
 }
 
 var ACTIONS = {
