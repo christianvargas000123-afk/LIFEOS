@@ -1,0 +1,13 @@
+{
+  "name": "LifeOS",
+  "short_name": "LifeOS",
+  "start_url": "./?home",
+  "scope": "./",
+  "display": "browser",
+  "background_color": "#ECE6DA",
+  "theme_color": "#ECE6DA",
+  "icons": [
+    { "src": "../apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "../icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
