@@ -1,5 +1,5 @@
 /* LifeOS · funcionamiento sin conexión. Los archivos de la app se piden primero a la red (para recibir actualizaciones) y, sin internet, se sirven desde la copia guardada. */
-const CACHE = 'lifeos-v2';
+const CACHE = 'lifeos-v3';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE))); self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))); self.clients.claim(); });
