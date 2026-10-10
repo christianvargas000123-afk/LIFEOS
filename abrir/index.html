@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LifeOS</title>
+<meta name="apple-mobile-web-app-title" content="LifeOS">
+<meta name="theme-color" content="#ECE6DA">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="icon" href="../icon-192.png" type="image/png">
+<meta name="robots" content="noindex">
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#ECE6DA;color:#1F2A24;font:700 16px/1.4 -apple-system,system-ui,sans-serif;text-align:center}
+img{width:96px;height:96px;border-radius:22px;box-shadow:0 8px 24px rgba(60,40,20,.18)}
+a{display:inline-block;margin-top:18px;padding:14px 22px;border-radius:14px;background:#2E4A3B;color:#F6EFE2;text-decoration:none}
+p{color:#535E57;max-width:300px;margin:14px auto 0;font-weight:600}
+</style>
+</head>
+<body>
+<main>
+<img src="../apple-touch-icon.png" alt="">
+<h1 style="margin:14px 0 0;font-size:24px">LifeOS</h1>
+<a id="go" href="https://script.google.com/macros/s/AKfycbzKpryUDVrqMYYdBzhuE5l0k5P2FlH2Ahn06lxY4H1xPD8o90Y9OpVrg08MAp05E7nLCw/exec">Abrir mi LifeOS</a>
+<p id="tip">Para tenerla en tu iPhone: toca Compartir → Agregar a pantalla de inicio.</p>
+</main>
+<script>
+/* Lanzador con ícono propio: el iPhone guarda este ícono y al tocarlo se abre tu LifeOS privada en Safari (con tu sesión de Google). */
+var url=document.getElementById('go').href;
+var fromHome=/[?&]home\b/.test(location.search);
+if(fromHome)location.replace(url);
+else if(!/iPhone|iPad|iPod/.test(navigator.userAgent))location.replace(url);
+else{history.replaceState(null,'',location.pathname+'?home');}
+</script>
+</body>
+</html>
