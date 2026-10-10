@@ -32,11 +32,19 @@ function appHtml(fresh) {
     var cached = parts.join('');
     if (cached.length) return cached;
   }
-  var html = UrlFetchApp.fetch(APP_URL + 'index.html?v=' + Date.now(), { muteHttpExceptions: true }).getContentText();
+  var html = packScripts(UrlFetchApp.fetch(APP_URL + 'index.html?v=' + Date.now(), { muteHttpExceptions: true }).getContentText());
   var size = 90000, n = Math.ceil(html.length / size), put = { app_n: String(n) };
   for (var j = 0; j < n; j++) put['app_' + j] = html.slice(j * size, (j + 1) * size);
   try { cache.putAll(put, 300); } catch (e) {}
   return html;
+}
+
+/* Google modifica el texto de los <script> al servir la página; se envían empaquetados en base64 para que lleguen intactos. */
+function packScripts(html) {
+  return html.replace(/<script>([\s\S]*?)<\/script>/g, function (m, code) {
+    var b64 = Utilities.base64Encode(code, Utilities.Charset.UTF_8);
+    return '<script>(0,eval)(decodeURIComponent(escape(atob("' + b64 + '"))))</' + 'script>';
+  });
 }
 
 /* La app llama aquí con google.script.run. Solo funciona para quien puede abrir la app: tú. */
