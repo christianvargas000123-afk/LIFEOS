@@ -310,6 +310,54 @@ details.more>div{padding:0 14px 14px}
 .confeti{position:fixed;inset:0;pointer-events:none;z-index:91;overflow:hidden}
 .confeti i{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;animation:caer 2.4s cubic-bezier(.2,.6,.4,1) forwards}
 @keyframes caer{to{transform:translate(var(--x),105vh) rotate(var(--r));opacity:.9}}
+/* ahorro e inversiones */
+.fin-hero{background:linear-gradient(160deg,#35574A 0%,#22392E 100%);color:#F3EBD8;border-radius:24px;padding:20px 18px;display:flex;flex-direction:column;gap:10px;box-shadow:0 14px 30px rgba(46,74,59,.25);position:relative;overflow:hidden}
+.fin-hero::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;border:1.5px solid rgba(212,175,106,.35);box-shadow:0 0 0 18px rgba(212,175,106,.06)}
+.fin-total{font:900 38px/1 var(--f-d);letter-spacing:-.02em}
+.fin-split{display:flex;height:8px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.12);gap:2px}
+.fin-split i{display:block;height:100%;border-radius:999px}
+.fin-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;font-weight:700;color:#E3DACB}
+.fin-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+.fin-legend b{color:#fff}
+.fin-kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.fin-kpis div{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:3px}
+.fin-kpis span{font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#CFC4AE}
+.fin-kpis b{font:900 17px/1.15 var(--f-d)}
+.fin-list{display:grid;gap:12px}
+@media(min-width:620px){.fin-list{grid-template-columns:1fr 1fr}}
+.fin-card{display:flex;flex-direction:column;gap:12px;padding:14px}
+.fin-top{all:unset;display:flex;gap:14px;align-items:center;cursor:pointer;width:100%;box-sizing:border-box}
+.fin-top h3{font-size:18px}
+.fin-amt{margin-top:2px}.fin-amt b{font:900 22px/1.1 var(--f-d)}
+.fin-ring{position:relative;flex:0 0 auto;display:grid;place-items:center}
+.fin-ring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.fin-ring em{font-style:normal;font-size:28px;line-height:1}
+.fin-tip{margin-top:6px;font-size:12.5px;font-weight:700;color:#6B5420;background:rgba(212,175,106,.18);border-radius:10px;padding:6px 9px;display:inline-block}
+.fin-quick{display:flex;gap:8px;flex-wrap:wrap}
+.fin-quick button{flex:1;min-width:72px;height:40px;border-radius:12px;border:1px solid var(--line2);background:var(--linen);font:800 14px/1 var(--f-b);color:var(--forest);cursor:pointer}
+.fin-quick button:active{transform:scale(.97);background:var(--sunk)}
+.fin-ico{width:56px;height:56px;flex:0 0 56px;border-radius:18px;display:grid;place-items:center;font-size:28px;background:var(--sunk);border:1px solid var(--line)}
+.fin-ico.big{width:72px;height:72px;font-size:36px;border-radius:22px}
+.fin-emojis{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.fin-emojis button{height:46px;border-radius:14px;border:1px solid var(--line);background:var(--card);font-size:22px;cursor:pointer}
+.fin-emojis button.on{border:2px solid var(--forest);background:rgba(46,74,59,.08)}
+.fin-sheet-top{display:flex;flex-direction:column;align-items:center;gap:6px;margin:4px 0 14px}
+.fin-move{display:grid;grid-template-columns:1fr auto auto;gap:8px}
+.fin-movs{display:flex;flex-direction:column}
+.fin-movs div{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.fin-movs .x{width:28px;height:28px;border-radius:50%;border:0;background:var(--sunk);display:grid;place-items:center;color:var(--ink3);cursor:pointer}
+.fl-on .fl-o,.fl-on .fl-i{transform-box:fill-box;transform-origin:50% 100%}
+.fl-on .fl-o{animation:flo 1.25s ease-in-out infinite}
+.fl-on .fl-i{animation:fli .85s ease-in-out infinite}
+.fl-on .fl-glow{transform-box:fill-box;transform-origin:center;animation:glow 1.6s ease-in-out infinite}
+.fl-on .sp{opacity:0;animation:spark 1.9s ease-out infinite}
+.fl-on .sp2{animation-delay:.65s}.fl-on .sp3{animation-delay:1.3s}
+@keyframes flo{0%,100%{transform:scale(1,1) skewX(0)}25%{transform:scale(.95,1.07) skewX(-3deg)}50%{transform:scale(1.04,.96) skewX(2deg)}75%{transform:scale(.97,1.05) skewX(-1.5deg)}}
+@keyframes fli{0%,100%{transform:scale(1,1)}40%{transform:scale(.86,1.16)}70%{transform:scale(1.06,.94)}}
+@keyframes glow{0%,100%{opacity:.35;transform:scale(.95)}50%{opacity:.7;transform:scale(1.12)}}
+@keyframes spark{0%{opacity:0;transform:translate(0,5px)}25%{opacity:1}100%{opacity:0;transform:translate(1.5px,-8px) scale(.4)}}
+.fl-off{animation:breathe 2.6s ease-in-out infinite;transform-origin:50% 90%}
+@keyframes breathe{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.05) rotate(-2deg)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -544,7 +592,7 @@ const PRIO={P1:'Urgente',P2:'Alta',P3:'Normal',P4:'Baja'};
 const REC={daily:'Cada día',weekly:'Cada semana',monthly:'Cada mes'};
 const defAreas=()=>[{id:'a_esc',nombre:'Escolar',color:'#3D5A87'},{id:'a_per',nombre:'Personal',color:'#4F7B5B'},{id:'a_lab',nombre:'Laboral',color:'#A8783A'}];
 /* sprints se mantiene en el modelo para no perder historial ni romper respaldos; la interfaz ya no lo usa */
-function blank(){return{v:2,ts:0,demo:false,areas:defAreas(),tasks:[],projects:[],sprints:[],goals:[],logs:[],deleted:{},settings:{remind:10,wip:3,gcal:true,meta:3}}}
+function blank(){return{v:2,ts:0,demo:false,areas:defAreas(),tasks:[],projects:[],sprints:[],savings:[],investments:[],goals:[],logs:[],deleted:{},settings:{remind:10,wip:3,gcal:true,meta:3}}}
 function normalize(o){const b=blank();const s=Object.assign(b,o||{});s.settings=Object.assign(blank().settings,(o||{}).settings||{});if(!s.areas||!s.areas.length)s.areas=defAreas();(s.tasks||[]).forEach(t=>{delete t.gcalBusy});s.deleted=s.deleted||{};return s}
 const VIEW_IDS=['today','tasks','calendar','plan'];
 const defU=()=>({view:'today',area:'all',calDate:tISO(),calMode:'month',tf:'pending',tv:'list',q:'',planMode:'goals',welcomed:false,cloudLinked:false,ignored:[]});
@@ -655,7 +703,7 @@ function mergeRemote(str,ts){
   const del=Object.assign({},R.deleted||{},L.deleted||{});
   const pick=(l,r)=>((r.updatedAt||'')>(l.updatedAt||'')?r:l);
   const mg=(la,ra)=>{const m=new Map();(ra||[]).forEach(x=>m.set(x.id,x));(la||[]).forEach(x=>m.set(x.id,m.has(x.id)?pick(x,m.get(x.id)):x));return[...m.values()].filter(x=>{if(!del[x.id])return true;if(Date.parse(x.updatedAt||0)>del[x.id]){delete del[x.id];return true}return false})};
-  const M=normalize(Object.assign({},L,{tasks:mg(L.tasks,R.tasks),projects:mg(L.projects,R.projects),goals:mg(L.goals,R.goals),areas:mg(L.areas,R.areas),sprints:mg(L.sprints,R.sprints),deleted:del,demo:false}));
+  const M=normalize(Object.assign({},L,{tasks:mg(L.tasks,R.tasks),projects:mg(L.projects,R.projects),goals:mg(L.goals,R.goals),savings:mg(L.savings,R.savings),investments:mg(L.investments,R.investments),areas:mg(L.areas,R.areas),sprints:mg(L.sprints,R.sprints),deleted:del,demo:false}));
   const seen=new Set();M.logs=[...(R.logs||[]),...(L.logs||[])].filter(l=>{const k=l.ts+'|'+l.taskId+'|'+l.a;if(seen.has(k))return false;seen.add(k);return true}).sort((a,b)=>a.ts>b.ts?1:-1).slice(-400);
   M.ts=Math.max(L.ts||0,ts||0);S=M;setRemoteTs(ts);saveLocal();renderAll();
 }
@@ -1052,6 +1100,10 @@ function vPlan(){
   return h+vProgress();
 }
 function vGoals(){
+  const tabs=`<div class="chips" role="group" aria-label="Objetivos" style="margin-bottom:2px">${chip('🎯 Metas',U.gm!=='dinero','data-a="finTab" data-v="metas"')}${chip('💰 Ahorro e inversiones',U.gm==='dinero','data-a="finTab" data-v="dinero"')}</div>`;
+  return tabs+(U.gm==='dinero'?vFin():vGoalsList());
+}
+function vGoalsList(){
   let h=`<button class="btn pri block" data-a="openNew" data-v="goal">Nuevo objetivo</button>`;
   if(!S.goals.length)return h+`<div class="card">${empty('Sin objetivos','Un objetivo es algo que quieres lograr y que puedes medir con un número, como “Correr 100 km” o “Ahorrar $20,000”.')}</div>`;
   return h+'<div class="grid3">'+S.goals.map(g=>{const a=areaById(g.areaId),{p,l}=goalProgress(g),pct=Math.round(p*100),dl=diffDays(today(),parseISO(g.limite));
@@ -1104,7 +1156,7 @@ function vBI(){
   const BL=['mañana','tarde','noche','madrugada'],bb=Math.max(...B.bands),bestBand=bb?BL[B.bands.indexOf(bb)]:null;
   let h=`<div class="sec">Tu productividad</div>
   <div class="grid2">
-   <button class="card kpi" data-a="game"><span class="l">Racha</span><span class="v num" style="display:flex;align-items:center;gap:6px">${flame(28,G.todayDone?'on':'off')}${G.streak}</span><span class="d">${G.streak?`${G.streak===1?'día':'días'} · récord ${G.best}`:'Completa una tarea hoy'}</span></button>
+   <button class="card kpi" data-a="game"><span class="l">Racha</span><span class="v num" style="display:flex;align-items:center;gap:6px">${flame(28,G.todayDone?'on':'off',true)}${G.streak}</span><span class="d">${G.streak?`${G.streak===1?'día':'días'} · récord ${G.best}`:'Completa una tarea hoy'}</span></button>
    <div class="card kpi"><span class="l">Ritmo diario</span><span class="v num">${B.avg.toFixed(1)}</span><span class="d">tareas por día (últimos 14) · hoy ${B.todayN}</span></div>
   </div>
   <div class="card"><h3>Lo que completas cada día</h3><div class="tiny faint" style="margin-bottom:8px">Últimos 14 días${B.bestDay?` · tu mejor día suele ser el <b>${B.bestDay}</b>`:''}</div>${B.anyDone?'<canvas class="chart" id="cDays" style="height:160px" role="img" aria-label="Tareas completadas por día"></canvas>':'<div class="muted small">Cuando completes tareas verás aquí tu ritmo.</div>'}</div>`;
@@ -1135,8 +1187,8 @@ const FLAME='M12 2c.6 3.2 2.6 5 4.3 6.9C18 10.8 19 12.9 19 15.2 19 19 15.9 22 12
 const FLAME_IN='M12 12.4c.4 1.6 1.5 2.5 2.2 3.5.5.7.8 1.4.8 2.2 0 1.7-1.3 3-3 3s-3-1.3-3-3c0-1.4.8-2.5 1.8-3.2.1.9.6 1.5 1.2 1.7-.3-1.4 0-2.9 0-4.2z';
 let flameN=0;
 function flame(s=24,st='on',anim=false){const id='fg'+(++flameN);
-  const c=st==='on'?['#F5BC4C','#D2652A','#FCE6A6']:st==='ice'?['#B9D3EC','#6E97C4','#E8F1FA']:['#DCD3C3','#C9BDA6','#ECE6DA'];
-  return`<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true" class="${anim&&st==='on'?'lit':''}"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c[0]}"/><stop offset="1" stop-color="${c[1]}"/></linearGradient></defs><path d="${FLAME}" fill="url(#${id})"/><path d="${FLAME_IN}" fill="${c[2]}"/></svg>`}
+  const c=st==='on'?['#F5BC4C','#D2652A','#FCE6A6']:st==='ice'?['#B9D3EC','#6E97C4','#E8F1FA']:['#DCD3C3','#C9BDA6','#ECE6DA'];const on=anim&&st==='on';
+  return`<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true" style="overflow:visible" class="${on?'fl-on':anim&&st==='off'?'fl-off':''}"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c[0]}"/><stop offset="1" stop-color="${c[1]}"/></linearGradient>${on?`<radialGradient id="${id}g"><stop offset="0" stop-color="#F5BC4C" stop-opacity=".9"/><stop offset="1" stop-color="#F5BC4C" stop-opacity="0"/></radialGradient>`:''}</defs>${on?`<ellipse class="fl-glow" cx="12" cy="15" rx="11" ry="9" fill="url(#${id}g)"/>`:''}<path class="fl-o" d="${FLAME}" fill="url(#${id})"/><path class="fl-i" d="${FLAME_IN}" fill="${c[2]}"/>${on?'<circle class="sp sp1" cx="8.5" cy="7" r="1" fill="#F5BC4C"/><circle class="sp sp2" cx="15.5" cy="6" r=".8" fill="#E8893A"/><circle class="sp sp3" cx="12" cy="3" r=".7" fill="#FCE6A6"/>':''}</svg>`}
 const LOGROS=[
   {id:'t1',e:'🌱',n:'Primer paso',d:'Completa tu primera tarea',ok:g=>g.total>=1},
   {id:'r3',e:'🔥',n:'Encendido',d:'Racha de 3 días',ok:g=>g.best>=3},
@@ -1152,7 +1204,10 @@ const LOGROS=[
   {id:'am',e:'🌅',n:'Madrugador',d:'Completa algo antes de las 8:00',ok:g=>g.early},
   {id:'pr',e:'🏁',n:'Proyecto cerrado',d:'Termina todas las tareas de un proyecto',ok:g=>g.projDone},
   {id:'d5',e:'⚡',n:'Día productivo',d:'5 tareas en un solo día',ok:g=>g.maxDay>=5},
-  {id:'hi',e:'🧊',n:'Salvado',d:'Un protector cuidó tu racha',ok:g=>g.saved}
+  {id:'hi',e:'🧊',n:'Salvado',d:'Un protector cuidó tu racha',ok:g=>g.saved},
+  {id:'f1',e:'💰',n:'Primer ahorro',d:'Guarda dinero en una meta de ahorro',ok:g=>g.finAny},
+  {id:'f2',e:'🏦',n:'Meta de ahorro',d:'Completa una meta de ahorro',ok:g=>g.finGoal},
+  {id:'f3',e:'📈',n:'Inversionista',d:'Registra tu primera inversión',ok:g=>g.invAny}
 ];
 const NIVELES=['Aprendiz','Ordenado','Constante','Enfocado','Disciplinado','Imparable','Maestro del tiempo','Leyenda'];
 const xpFor=n=>50*n*(n+1); /* experiencia total para pasar del nivel n al n+1 */
@@ -1176,18 +1231,19 @@ function game(){
   const g={streak:run,best,ice,saved,st,todayDone,M,metaDays,total:done.length,xp,lvl:lvl+1,lvlName:NIVELES[Math.min(lvl,NIVELES.length-1)],lvlPct:(xp-base)/(next-base),toNext:next-xp,
     onTime:done.filter(t=>t.fecha&&iso(new Date(t.completedAt))<=t.fecha).length,early:done.some(t=>new Date(t.completedAt).getHours()<8),
     maxDay:Math.max(0,...Object.values(by)),projDone:S.projects.some(p=>{const l=S.tasks.filter(t=>t.proyectoId===p.id);return l.length>=3&&l.every(isDone)})};
+  g.finAny=(S.savings||[]).some(x=>(x.movs||[]).some(m=>m.monto>0));g.finGoal=(S.savings||[]).some(x=>x.meta>0&&sum(x.movs||[],m=>m.monto)>=x.meta);g.invAny=(S.investments||[]).length>0;
   g.earned=LOGROS.filter(l=>l.ok(g)).map(l=>l.id);
   return g;
 }
 function weekStrip(g){const T=today(),s=startOfWeek(T),L=['L','M','X','J','V','S','D'];
   return`<div class="gweek">${L.map((l,i)=>{const d=addDays(s,i),k=iso(d),fut=k>iso(T);const st=g.st[k]||(fut?'none':'off');
-    return`<span class="${k===iso(T)?'t':''}">${st==='none'?`<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="4" fill="var(--line)"/></svg>`:flame(16,st)}${l}</span>`}).join('')}</div>`}
+    return`<span class="${k===iso(T)?'t':''}">${st==='none'?`<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="4" fill="var(--line)"/></svg>`:flame(16,st,k===iso(T))}${l}</span>`}).join('')}</div>`}
 function ring(v,max,s=58){const r=24,c=2*Math.PI*r,p=Math.min(1,v/max);
   return`<div class="gring" style="width:${s}px;height:${s}px"><svg width="${s}" height="${s}" viewBox="0 0 58 58" aria-hidden="true"><circle cx="29" cy="29" r="${r}" fill="none" stroke="var(--sunk)" stroke-width="6"/><circle cx="29" cy="29" r="${r}" fill="none" stroke="${p>=1?'var(--ok)':'var(--camel)'}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-p)}"/></svg><b class="num">${Math.min(v,99)}/${max}</b></div>`}
 function gameCard(){
   const g=game(),lit=g.todayDone>0;
   return`<button class="card gstrip" data-a="game" aria-label="Tu racha: ${g.streak} días. Toca para ver tus logros.">
-    <div class="gflame">${flame(46,lit?'on':'off',lit)}</div>
+    <div class="gflame">${flame(46,lit?'on':'off',true)}</div>
     <div style="min-width:0"><div class="gstreak"><b class="num" style="font:900 26px/1 var(--f-d)">${g.streak}</b><span class="small" style="font-weight:800">${g.streak===1?'día de racha':'días de racha'}</span>${g.ice?`<span title="Protectores de racha" class="small">${'🧊'.repeat(g.ice)}</span>`:''}</div>
       <div class="tiny ${lit?'muted':''}" style="${lit?'':'color:var(--claret);font-weight:800'}">${lit?(g.todayDone>=g.M?'¡Meta del día cumplida!':`Racha a salvo hoy · ${g.M-g.todayDone} para tu meta`):g.streak?'Completa 1 tarea hoy para no perderla':'Completa 1 tarea para encender tu racha'}</div>
       ${weekStrip(g)}</div>
@@ -1195,7 +1251,7 @@ function gameCard(){
   </button>`}
 function shGame(){
   const g=game(),lit=g.todayDone>0;
-  return`<div style="text-align:center"><div style="display:inline-block">${flame(84,lit?'on':'off',lit)}</div>
+  return`<div style="text-align:center"><div style="display:inline-block;padding-top:8px">${flame(84,lit?'on':'off',true)}</div>
     <h2 id="shT" style="margin-top:4px">${g.streak} ${g.streak===1?'día':'días'} de racha</h2>
     <div class="small muted">Récord: ${g.best} ${g.best===1?'día':'días'}${g.ice?` · ${g.ice} ${g.ice===1?'protector':'protectores'} 🧊`:''}</div>
     <div style="display:flex;justify-content:center;margin-top:10px">${weekStrip(g)}</div></div>
@@ -1225,6 +1281,111 @@ function gameAfter(before,t){
   if(before.todayDone<g.M&&g.todayDone>=g.M)return celebrate(`<span style="font-size:72px;line-height:1">🎯</span>`,'¡Meta del día!',`+20 XP extra. Llevas ${g.metaDays} ${g.metaDays===1?'día':'días'} cumpliendo tu meta.`),xp;
   return xp;
 }
+/* ══════════════ ahorro e inversiones ══════════════ */
+const MXN=new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0});
+const money=n=>MXN.format(Math.round(+n||0));
+const FIN_EMOJI=['🛡️','🏠','🚗','✈️','🎓','👶','💍','💻','🎉','🏖️','🐶','💰'];
+const INV_TIPOS=[['cetes','CETES','🏛️'],['fondo','Fondo','📊'],['acciones','Acciones','📈'],['afore','Afore','🧓'],['cripto','Cripto','🪙'],['otro','Otro','💼']];
+const fSav=()=>S.savings||(S.savings=[]),fInv=()=>S.investments||(S.investments=[]);
+const savedOf=s=>sum(s.movs||[],m=>m.monto);
+const aportOf=i=>sum(i.movs||[],m=>m.monto);
+const valOf=i=>i.valor==null?aportOf(i):+i.valor;
+const finById=id=>fSav().find(x=>x.id===id)||fInv().find(x=>x.id===id);
+const isInv=x=>!!fInv().find(y=>y===x);
+const touch=x=>{x.updatedAt=new Date().toISOString()};
+function savPlan(s){const falta=Math.max(0,s.meta-savedOf(s));if(!s.limite||!falta)return null;const d=diffDays(today(),parseISO(s.limite));if(d<=0)return{late:true,falta};
+  const q=Math.max(1,Math.ceil(d/15));return{falta,dias:d,porQuincena:falta/q,porSemana:falta/Math.max(1,Math.ceil(d/7))}}
+function finSummary(){const ah=sum(fSav(),savedOf),inv=sum(fInv(),valOf),ap=sum(fInv(),aportOf);
+  const m0=iso(new Date(today().getFullYear(),today().getMonth(),1));
+  const mes=sum([...fSav(),...fInv()].flatMap(x=>x.movs||[]).filter(m=>m.fecha>=m0&&m.monto>0),m=>m.monto);
+  return{ah,inv,ap,total:ah+inv,rend:inv-ap,rendP:ap?(inv-ap)/ap*100:0,mes}}
+function vFin(){
+  const F=finSummary(),hasAny=fSav().length||fInv().length;
+  const pa=F.total?Math.round(F.ah/F.total*100):0;
+  let h=`<section class="fin-hero">
+    <span class="eyebrow" style="color:#E9DCC0">Tu patrimonio</span>
+    <b class="fin-total num">${money(F.total)}</b>
+    <div class="fin-split" aria-hidden="true"><i style="width:${pa}%;background:#D4AF6A"></i><i style="width:${100-pa}%;background:#9DB8A6"></i></div>
+    <div class="fin-legend"><span><i style="background:#D4AF6A"></i>Ahorro <b class="num">${money(F.ah)}</b></span><span><i style="background:#9DB8A6"></i>Inversión <b class="num">${money(F.inv)}</b></span></div>
+    <div class="fin-kpis"><div><span>Este mes guardaste</span><b class="num">${money(F.mes)}</b></div><div><span>Rendimiento</span><b class="num" style="color:${F.rend>=0?'#B9E0C4':'#F2B8B8'}">${F.rend>=0?'+':''}${money(F.rend)}${F.ap?` · ${F.rendP>=0?'+':''}${F.rendP.toFixed(1)}%`:''}</b></div></div>
+  </section>
+  <div class="grid2"><button class="btn pri" data-a="finNew" data-v="saving">+ Ahorro</button><button class="btn" data-a="finNew" data-v="inv">+ Inversión</button></div>`;
+  if(!hasAny)return h+`<div class="card">${empty('Empieza con una meta','Por ejemplo, un fondo de emergencia de 3 meses de gastos, o registra tus CETES para ver cuánto te rinden.')}</div>`;
+  if(fSav().length)h+=sec('Metas de ahorro',fSav().length)+`<div class="fin-list">${fSav().map(savCard).join('')}</div>`;
+  if(fInv().length)h+=sec('Inversiones',fInv().length)+`<div class="fin-list">${fInv().map(invCard).join('')}</div>`;
+  return h+`<div class="tiny faint" style="text-align:center;margin-top:6px">Tus montos solo se guardan en tu LifeOS privada. Los rendimientos los actualizas tú con el valor que ves en tu banco o app.</div>`;
+}
+function bigRing(p,col,inner,s=76){const r=31,c=2*Math.PI*r,v=Math.max(0,Math.min(1,p));
+  return`<div class="fin-ring" style="width:${s}px;height:${s}px"><svg width="${s}" height="${s}" viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="38" r="${r}" fill="none" stroke="var(--sunk)" stroke-width="7"/><circle cx="38" cy="38" r="${r}" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-v)}" style="transition:stroke-dashoffset .6s"/></svg><span>${inner}</span></div>`}
+function savCard(s){const sv=savedOf(s),p=s.meta?sv/s.meta:0,pct=Math.round(p*100),pl=savPlan(s),done=sv>=s.meta&&s.meta>0;
+  return`<article class="card fin-card">
+    <button class="fin-top" data-a="finOpen" data-id="${s.id}">
+      ${bigRing(p,done?'var(--ok)':'var(--camel)',`<em>${s.emoji||'💰'}</em>`)}
+      <div style="min-width:0;flex:1"><h3>${esc(s.nombre)}</h3>
+        <div class="fin-amt"><b class="num">${money(sv)}</b><span class="muted"> de ${money(s.meta)}</span></div>
+        <div class="tiny ${done?'':'muted'}" style="${done?'color:var(--ok);font-weight:900':''}">${done?'¡Meta cumplida! 🎉':`${pct}% · faltan ${money(s.meta-sv)}`}</div>
+        ${pl&&!done?`<div class="fin-tip">${pl.late?`El plazo ya pasó · faltan ${money(pl.falta)}`:`Guarda <b>${money(pl.porQuincena)}</b> por quincena para llegar en ${pl.dias} días`}</div>`:''}
+      </div></button>
+    ${done?'':`<div class="fin-quick">${[100,500,1000].map(n=>`<button data-a="finQuick" data-id="${s.id}" data-v="${n}">+${money(n)}</button>`).join('')}<button data-a="finOpen" data-id="${s.id}">Otro</button></div>`}
+  </article>`}
+function invCard(i){const ap=aportOf(i),v=valOf(i),r=v-ap,rp=ap?r/ap*100:0,t=INV_TIPOS.find(x=>x[0]===i.tipo)||INV_TIPOS[5];
+  const dias=i.valorFecha?diffDays(parseISO(i.valorFecha),today()):null;
+  return`<article class="card fin-card">
+    <button class="fin-top" data-a="finOpen" data-id="${i.id}">
+      <div class="fin-ico">${t[2]}</div>
+      <div style="min-width:0;flex:1"><div class="row" style="gap:8px"><h3 style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(i.nombre)}</h3><span class="pill">${t[1]}</span></div>
+        <div class="fin-amt"><b class="num">${money(v)}</b></div>
+        <div class="tiny"><span class="muted">Aportado ${money(ap)} · </span><b class="num" style="color:${r>=0?'var(--ok)':'var(--bad)'}">${r>=0?'▲ +':'▼ '}${money(r)} (${rp>=0?'+':''}${rp.toFixed(1)}%)</b></div>
+        <div class="tiny faint">${dias==null?'Aún no actualizas su valor':dias===0?'Valor actualizado hoy':`Valor actualizado hace ${dias} ${dias===1?'día':'días'}`}</div>
+      </div></button>
+    <div class="fin-quick"><button data-a="finOpen" data-id="${i.id}" data-v="aportar">Aportar</button><button data-a="finOpen" data-id="${i.id}" data-v="valor">Actualizar valor</button></div>
+  </article>`}
+function shFinNew(){const inv=SH.arg==='inv',d=SH.d;
+  return shHead(inv?'Nueva inversión':'Nueva meta de ahorro',inv?'¿Dónde inviertes?':'¿Para qué ahorras?')+
+  blk('Nombre',`<input type="text" data-fbind="nombre" value="${esc(d.nombre||'')}" placeholder="${inv?'Ej. CETES Directo':'Ej. Fondo de emergencia'}" autocomplete="off">`)+
+  (inv?blk('Tipo',`<div class="chips">${INV_TIPOS.map(([k,l,e])=>chip(`${e} ${l}`,(d.tipo||'cetes')===k,`data-a="finSet" data-k="tipo" data-v="${k}"`)).join('')}</div>`)
+     :blk('Ícono',`<div class="fin-emojis">${FIN_EMOJI.map(e=>`<button class="${(d.emoji||'🛡️')===e?'on':''}" data-a="finSet" data-k="emoji" data-v="${e}" aria-label="${e}">${e}</button>`).join('')}</div>`)+
+      `<div class="grid2">${blk('Meta ($)',`<input type="number" inputmode="decimal" data-fbind="meta" value="${esc(d.meta||'')}" placeholder="40000">`)}${blk('Para cuándo',`<input type="date" data-fbind="limite" value="${esc(d.limite||'')}">`,'Opcional')}</div>`)+
+  blk(inv?'Monto invertido hoy ($)':'Ya tengo ahorrado ($)',`<input type="number" inputmode="decimal" data-fbind="ini" value="${esc(d.ini||'')}" placeholder="0">`)+
+  `<button class="btn pri block" data-a="finCreate">${inv?'Agregar inversión':'Crear meta'}</button>`}
+function shFin(){const x=finById(SH.arg);if(!x)return'';const inv=isInv(x),d=SH.d;
+  const movs=(x.movs||[]).slice().sort((a,b)=>a.fecha<b.fecha?1:-1).slice(0,25);
+  const head=inv?(()=>{const ap=aportOf(x),v=valOf(x),r=v-ap;return`<div class="fin-sheet-top"><div class="fin-ico big">${(INV_TIPOS.find(t=>t[0]===x.tipo)||INV_TIPOS[5])[2]}</div><b class="num" style="font:900 30px/1 var(--f-d)">${money(v)}</b><span class="small" style="color:${r>=0?'var(--ok)':'var(--bad)'};font-weight:900">${r>=0?'+':''}${money(r)} sobre ${money(ap)} aportado</span></div>`})()
+    :(()=>{const sv=savedOf(x);return`<div class="fin-sheet-top">${bigRing(x.meta?sv/x.meta:0,sv>=x.meta?'var(--ok)':'var(--camel)',`<em>${x.emoji||'💰'}</em>`,96)}<b class="num" style="font:900 30px/1 var(--f-d)">${money(sv)}</b><span class="small muted">de ${money(x.meta)}</span></div>`})();
+  return shHead(inv?'Inversión':'Meta de ahorro',esc(x.nombre))+head+
+  blk(inv?'Mover dinero':'Agregar o retirar',`<div class="fin-move"><input type="number" inputmode="decimal" id="finAmt" data-fbind="amt" value="${esc(d.amt||'')}" placeholder="$ monto"${d.focus==='aportar'?' autofocus':''}><button class="btn pri" data-a="finMov" data-v="in">${inv?'Aportar':'Guardar'}</button><button class="btn" data-a="finMov" data-v="out">Retirar</button></div>`)+
+  (inv?blk('Valor actual',`<div class="fin-move"><input type="number" inputmode="decimal" data-fbind="val" value="${esc(d.val||'')}" placeholder="${Math.round(valOf(x))}"${d.focus==='valor'?' autofocus':''}><button class="btn pri" data-a="finVal">Actualizar</button></div>`,'Escribe lo que hoy dice tu app o banco. Así calculo cuánto te ha rendido.')
+     :blk('Meta y fecha',`<div class="grid2"><input type="number" inputmode="decimal" data-fedit="meta" data-id="${x.id}" value="${x.meta}" aria-label="Meta"><input type="date" data-fedit="limite" data-id="${x.id}" value="${x.limite||''}" aria-label="Fecha límite"></div>`))+
+  blk(`Movimientos · ${(x.movs||[]).length}`,movs.length?`<div class="fin-movs">${movs.map(m=>`<div><span class="small">${fmtD(m.fecha)}</span><b class="num" style="color:${m.monto>=0?'var(--ok)':'var(--bad)'}">${m.monto>=0?'+':''}${money(m.monto)}</b><button class="x" data-a="finMovDel" data-id="${x.id}" data-v="${m.id}" aria-label="Borrar movimiento">${ic('x',14,2.4)}</button></div>`).join('')}</div>`:'<span class="faint small">Aún no hay movimientos.</span>')+
+  `<button class="btn danger block ${d.arm?'armed':''}" data-a="finDel" data-id="${x.id}">${d.arm?'Toca otra vez para eliminar':'Eliminar'}</button>`}
+function addMov(x,monto){if(!x.movs)x.movs=[];x.movs.push({id:uid('m'),fecha:tISO(),monto:+monto});touch(x)}
+function finAfterSave(x,before){const g=typeof game==='function'?game():null;
+  if(!isInv(x)&&x.meta>0&&before<x.meta&&savedOf(x)>=x.meta&&typeof celebrate==='function'){celebrate('<span style="font-size:72px;line-height:1">🏦</span>','¡Meta de ahorro cumplida!',`${x.nombre}: ${money(savedOf(x))}`);return true}
+  return false}
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a;if(!/^fin/.test(a))return;
+  const id=el.dataset.id,v=el.dataset.v;
+  if(a==='finTab'){U.gm=v;saveU();renderView();return}
+  if(a==='finNew'){openSheet('finNew',v,{tipo:'cetes',emoji:'🛡️'});return}
+  if(a==='finOpen'){openSheet('fin',id,{focus:v||''});setTimeout(()=>{const i=$('#layer [autofocus]');i&&i.focus()},60);return}
+  if(a==='finSet'){SH.d[el.dataset.k]=v;renderSheet();return}
+  if(a==='finCreate'){const d=SH.d,nombre=(d.nombre||'').trim(),ini=+d.ini||0,now=new Date().toISOString();
+    if(!nombre){toast('Ponle un nombre','','warn');return}
+    if(SH.arg==='inv'){const x={id:uid('i'),nombre,tipo:d.tipo||'cetes',movs:[],valor:null,valorFecha:null,createdAt:now,updatedAt:now};if(ini)addMov(x,ini);fInv().push(x)}
+    else{if(!(+d.meta>0)){toast('Escribe cuánto quieres juntar','','warn');return}const x={id:uid('s'),nombre,emoji:d.emoji||'🛡️',meta:+d.meta,limite:d.limite||null,movs:[],createdAt:now,updatedAt:now};if(ini)addMov(x,ini);fSav().push(x)}
+    const wasInv=SH.arg==='inv';save();closeSheet();renderView();toast(wasInv?'Inversión agregada':'Meta de ahorro creada',nombre,'ok');return}
+  if(a==='finQuick'){const x=finById(id);if(!x)return;const b=savedOf(x);addMov(x,+v);save();renderView();if(!finAfterSave(x,b))toast(`+${money(+v)} guardados`,`${x.nombre} · ${money(savedOf(x))}`,'ok',{label:'Deshacer',fn:()=>{x.movs.pop();touch(x);save();renderView()}});return}
+  if(a==='finMov'){const x=finById(SH.arg),n=Math.abs(+SH.d.amt||0);if(!x||!n){toast('Escribe un monto','','warn');return}const b=savedOf(x);addMov(x,v==='out'?-n:n);
+    if(isInv(x)&&x.valor!=null)x.valor=+x.valor+(v==='out'?-n:n);
+    SH.d.amt='';save();renderSheet();renderView();if(!finAfterSave(x,b))toast(v==='out'?`Retiraste ${money(n)}`:`+${money(n)}`,x.nombre,'ok');return}
+  if(a==='finVal'){const x=finById(SH.arg),n=+SH.d.val;if(!x||!(n>=0)||SH.d.val===''||SH.d.val==null){toast('Escribe el valor actual','','warn');return}x.valor=n;x.valorFecha=tISO();touch(x);SH.d.val='';save();renderSheet();renderView();toast('Valor actualizado',`${x.nombre} · ${money(n)}`,'ok');return}
+  if(a==='finMovDel'){const x=finById(id);if(!x)return;x.movs=(x.movs||[]).filter(m=>m.id!==v);touch(x);save();renderSheet();renderView();return}
+  if(a==='finDel'){if(!SH.d.arm){SH.d.arm=1;renderSheet();return}const x=finById(id);if(!x)return;S.deleted=S.deleted||{};S.deleted[x.id]=Date.now();S.savings=fSav().filter(y=>y!==x);S.investments=fInv().filter(y=>y!==x);save();closeSheet();renderView();toast('Eliminado',x.nombre,'');return}
+});
+document.addEventListener('input',e=>{const el=e.target;
+  if(el.dataset.fbind&&SH){SH.d[el.dataset.fbind]=el.value;return}
+  if(el.dataset.fedit){const x=finById(el.dataset.id);if(!x)return;const k=el.dataset.fedit;x[k]=k==='limite'?(el.value||null):(+el.value||0);touch(x);clearTimeout(el._t);el._t=setTimeout(()=>{save();renderView()},400)}
+});
 function vProgress(){
   const T=today(),tI=iso(T),ws=iso(startOfWeek(T));
   const due=live().filter(t=>t.fecha&&t.fecha>=ws&&t.fecha<=tI);
@@ -1292,7 +1453,7 @@ function renderSheet(first){
   if(!SH){closeSheet();return}
   const prev=$('#layer .glass');const st=prev?prev.scrollTop:0;
   const open=prev?$$('#layer details[open]').map(d=>d.dataset.k):[];
-  const html=({new:shNew,task:shTask,day:shDay,settings:shSettings,welcome:shWelcome,install:shInstall,goal:shGoal,project:shProject,area:shArea,gantt:shGantt,game:shGame}[SH.kind]||(()=>''))();
+  const html=({new:shNew,task:shTask,day:shDay,settings:shSettings,welcome:shWelcome,install:shInstall,goal:shGoal,project:shProject,area:shArea,gantt:shGantt,game:shGame,finNew:shFinNew,fin:shFin}[SH.kind]||(()=>''))();
   if(!html){closeSheet();return}
   $('#layer').innerHTML=`<div class="layer" data-a="scrim"><div class="glass ${SH.kind==='gantt'?'wide':''}" role="dialog" aria-modal="true" aria-labelledby="shT" tabindex="-1">${html}</div></div>`;
   open.forEach(k=>{const d=$(`#layer details[data-k="${k}"]`);if(d)d.open=true});
