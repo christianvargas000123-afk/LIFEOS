@@ -280,6 +280,36 @@ details.more>div{padding:0 14px 14px}
 .toast.ok{border-left:4px solid #8DB79A} .toast.warn{border-left:4px solid #E1B860} .toast.bad{border-left:4px solid #E08A8A}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
+/* juego: racha con fuego, meta diaria, nivel y logros */
+.gstrip{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;cursor:pointer;text-align:left;width:100%;font:inherit;color:inherit}
+.gflame{display:grid;place-items:center;position:relative}
+.gflame b{font:900 30px/1 var(--f-d);color:var(--ink)}
+.gstreak{display:flex;align-items:center;gap:6px}
+.gweek{display:flex;gap:4px;margin-top:6px}
+.gweek span{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;font-weight:900;color:var(--ink3);width:22px}
+.gweek span.t{color:var(--ink)}
+.gring{width:58px;height:58px;position:relative;display:grid;place-items:center}
+.gring svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.gring b{font:900 15px/1 var(--f-d)}
+.glvl{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.glvl .bar{flex:1;height:8px}
+.gbadge{font:900 11px/1 var(--f-b);letter-spacing:.06em;text-transform:uppercase;color:#F6EFE2;background:var(--claret);border-radius:999px;padding:6px 9px;white-space:nowrap}
+.lit{animation:flick 1.6s ease-in-out infinite;transform-origin:50% 90%}
+@keyframes flick{0%,100%{transform:scale(1,1)}35%{transform:scale(.97,1.05)}70%{transform:scale(1.03,.97)}}
+.logros{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.logro{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:12px 6px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+.logro i{font-style:normal;font-size:30px;line-height:1}
+.logro b{font-size:12.5px;line-height:1.15}
+.logro span{font-size:11px;color:var(--ink3);font-weight:700;line-height:1.2}
+.logro.off i{filter:grayscale(1);opacity:.35}
+.logro.off b{color:var(--ink3)}
+.celebra{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(46,40,30,.25);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);animation:fade .2s}
+.celebra .box{background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--glass-edge);border-radius:28px;padding:26px 28px;text-align:center;max-width:300px;box-shadow:0 20px 50px rgba(60,40,20,.25);animation:rise .35s cubic-bezier(.2,.9,.3,1.2)}
+.celebra h2{font-size:26px;margin-top:8px}
+.celebra .big{animation:pop .6s cubic-bezier(.2,.9,.3,1.4)}
+.confeti{position:fixed;inset:0;pointer-events:none;z-index:91;overflow:hidden}
+.confeti i{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;animation:caer 2.4s cubic-bezier(.2,.6,.4,1) forwards}
+@keyframes caer{to{transform:translate(var(--x),105vh) rotate(var(--r));opacity:.9}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -514,7 +544,7 @@ const PRIO={P1:'Urgente',P2:'Alta',P3:'Normal',P4:'Baja'};
 const REC={daily:'Cada día',weekly:'Cada semana',monthly:'Cada mes'};
 const defAreas=()=>[{id:'a_esc',nombre:'Escolar',color:'#3D5A87'},{id:'a_per',nombre:'Personal',color:'#4F7B5B'},{id:'a_lab',nombre:'Laboral',color:'#A8783A'}];
 /* sprints se mantiene en el modelo para no perder historial ni romper respaldos; la interfaz ya no lo usa */
-function blank(){return{v:2,ts:0,demo:false,areas:defAreas(),tasks:[],projects:[],sprints:[],goals:[],logs:[],deleted:{},settings:{remind:10,wip:3,gcal:true}}}
+function blank(){return{v:2,ts:0,demo:false,areas:defAreas(),tasks:[],projects:[],sprints:[],goals:[],logs:[],deleted:{},settings:{remind:10,wip:3,gcal:true,meta:3}}}
 function normalize(o){const b=blank();const s=Object.assign(b,o||{});s.settings=Object.assign(blank().settings,(o||{}).settings||{});if(!s.areas||!s.areas.length)s.areas=defAreas();(s.tasks||[]).forEach(t=>{delete t.gcalBusy});s.deleted=s.deleted||{};return s}
 const VIEW_IDS=['today','tasks','calendar','plan'];
 const defU=()=>({view:'today',area:'all',calDate:tISO(),calMode:'month',tf:'pending',tv:'list',q:'',planMode:'goals',welcomed:false,cloudLinked:false,ignored:[]});
@@ -775,10 +805,12 @@ function spawnNext(t){
 }
 function complete(t){
   if(isDone(t)){t.estado='todo';t.completedAt=null;t.updatedAt=new Date().toISOString();save();renderAll();if(t.gcalId&&!t.gcalSeries)gcUpdate(t);toast('Tarea reabierta',t.titulo,'');return}
+  const gBefore=game();
   t.estado='done';t.completedAt=new Date().toISOString();if(!t.real)t.real=t.est||0;t.updatedAt=t.completedAt;
   log(t.id,'complete',t.areaId,t.real);const clone=spawnNext(t);save();renderAll();
   if(t.gcalId&&!t.gcalSeries)gcUpdate(t,{summary:'✓ ◈ '+t.titulo,useDefaultReminders:false});
-  toast('Completada',clone?`${t.titulo} · siguiente: ${relDay(clone.fecha)}`:t.titulo,'ok',{label:'Deshacer',fn:()=>{if(clone){S.tasks=S.tasks.filter(x=>x!==clone);S.goals.forEach(g=>g.tasks=(g.tasks||[]).filter(x=>x!==clone.id))}if(isDone(t))complete(t)}});
+  const xp=gameAfter(gBefore,t);
+  toast(`Completada · +${xp} XP`,clone?`${t.titulo} · siguiente: ${relDay(clone.fecha)}`:t.titulo,'ok',{label:'Deshacer',fn:()=>{if(clone){S.tasks=S.tasks.filter(x=>x!==clone);S.goals.forEach(g=>g.tasks=(g.tasks||[]).filter(x=>x!==clone.id))}if(isDone(t))complete(t)}});
 }
 function setBoard(t,col){
   if(col==='done'){if(!isDone(t))complete(t);return}
@@ -912,6 +944,7 @@ function vToday(){
     <h1>${left?`Tienes <em>${left}</em> ${left===1?'pendiente':'pendientes'} para hoy`:doneToday?'Terminaste lo de hoy':'Día despejado'}</h1>
     ${doneToday?`<span class="small muted">Completaste ${doneToday} hoy.</span>`:''}</section>
   <div class="quick"><label class="sr" for="quick">Nueva tarea rápida</label><input type="text" id="quick" enterkeyhint="done" autocomplete="off" placeholder="Ej. Preparar reporte mañana 10:00"><button class="btn pri" data-a="quickAdd">Añadir</button></div>`;
+  h+=gameCard();
   if(next){const a=areaById(next.areaId);
     h+=`<section class="next" aria-label="Lo siguiente"><span class="eyebrow">${isOverdue(next)?'Vencida · atiéndela primero':'Lo siguiente'}</span><h3>${esc(next.titulo)}</h3>
     <div class="m">${esc(a.nombre)}${next.hora?` · ${next.hora}`:''}${isOverdue(next)?` · venció ${fmtD(next.fecha)}`:''}${next.est?` · ${fmtH(next.est)}`:''}${next.prioridad==='P1'?' · Urgente':''}</div>
@@ -1067,11 +1100,11 @@ function biData(){
   };
 }
 function vBI(){
-  const B=biData(),hh=x=>{const v=Math.round(x*10)/10;return(v%1?v.toFixed(1):String(v))+' h'};
+  const G=game(),B=biData(),hh=x=>{const v=Math.round(x*10)/10;return(v%1?v.toFixed(1):String(v))+' h'};
   const BL=['mañana','tarde','noche','madrugada'],bb=Math.max(...B.bands),bestBand=bb?BL[B.bands.indexOf(bb)]:null;
   let h=`<div class="sec">Tu productividad</div>
   <div class="grid2">
-   <div class="card kpi"><span class="l">Racha</span><span class="v num">${B.streak} ${B.streak===1?'día':'días'}</span><span class="d">${B.streak?`seguidos completando algo · récord ${B.best}`:'Completa una tarea hoy y empieza tu racha'}</span></div>
+   <button class="card kpi" data-a="game"><span class="l">Racha</span><span class="v num" style="display:flex;align-items:center;gap:6px">${flame(28,G.todayDone?'on':'off')}${G.streak}</span><span class="d">${G.streak?`${G.streak===1?'día':'días'} · récord ${G.best}`:'Completa una tarea hoy'}</span></button>
    <div class="card kpi"><span class="l">Ritmo diario</span><span class="v num">${B.avg.toFixed(1)}</span><span class="d">tareas por día (últimos 14) · hoy ${B.todayN}</span></div>
   </div>
   <div class="card"><h3>Lo que completas cada día</h3><div class="tiny faint" style="margin-bottom:8px">Últimos 14 días${B.bestDay?` · tu mejor día suele ser el <b>${B.bestDay}</b>`:''}</div>${B.anyDone?'<canvas class="chart" id="cDays" style="height:160px" role="img" aria-label="Tareas completadas por día"></canvas>':'<div class="muted small">Cuando completes tareas verás aquí tu ritmo.</div>'}</div>`;
@@ -1096,6 +1129,101 @@ function vBI(){
 function drawBI(){
   const cd=$('#cDays');if(cd){const B=biData();drawBars(cd,B.d14.map(x=>x.l),B.d14.map(x=>x.v),'#2E4A3B')}
   const cb=$('#cBands');if(cb){const B=biData();drawBars(cb,['Mañana','Tarde','Noche','Madrugada'],B.bands,'#B48E58')}
+}
+/* ══════════════ juego: racha, meta diaria, experiencia y logros ══════════════ */
+const FLAME='M12 2c.6 3.2 2.6 5 4.3 6.9C18 10.8 19 12.9 19 15.2 19 19 15.9 22 12 22s-7-3-7-6.8c0-2.4 1.1-4.3 2.6-5.7.3 1.6 1.2 2.7 2.4 3.2C9.4 9.6 10.4 5.2 12 2z';
+const FLAME_IN='M12 12.4c.4 1.6 1.5 2.5 2.2 3.5.5.7.8 1.4.8 2.2 0 1.7-1.3 3-3 3s-3-1.3-3-3c0-1.4.8-2.5 1.8-3.2.1.9.6 1.5 1.2 1.7-.3-1.4 0-2.9 0-4.2z';
+let flameN=0;
+function flame(s=24,st='on',anim=false){const id='fg'+(++flameN);
+  const c=st==='on'?['#F5BC4C','#D2652A','#FCE6A6']:st==='ice'?['#B9D3EC','#6E97C4','#E8F1FA']:['#DCD3C3','#C9BDA6','#ECE6DA'];
+  return`<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true" class="${anim&&st==='on'?'lit':''}"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c[0]}"/><stop offset="1" stop-color="${c[1]}"/></linearGradient></defs><path d="${FLAME}" fill="url(#${id})"/><path d="${FLAME_IN}" fill="${c[2]}"/></svg>`}
+const LOGROS=[
+  {id:'t1',e:'🌱',n:'Primer paso',d:'Completa tu primera tarea',ok:g=>g.total>=1},
+  {id:'r3',e:'🔥',n:'Encendido',d:'Racha de 3 días',ok:g=>g.best>=3},
+  {id:'r7',e:'🔥',n:'Semana en llamas',d:'Racha de 7 días',ok:g=>g.best>=7},
+  {id:'r30',e:'☄️',n:'Mes de fuego',d:'Racha de 30 días',ok:g=>g.best>=30},
+  {id:'r100',e:'👑',n:'Leyenda',d:'Racha de 100 días',ok:g=>g.best>=100},
+  {id:'m1',e:'🎯',n:'Meta cumplida',d:'Llega a tu meta del día',ok:g=>g.metaDays>=1},
+  {id:'m7',e:'🏹',n:'Puntería',d:'7 días con meta cumplida',ok:g=>g.metaDays>=7},
+  {id:'t25',e:'⭐',n:'Constante',d:'25 tareas completadas',ok:g=>g.total>=25},
+  {id:'t100',e:'🌟',n:'Centenario',d:'100 tareas completadas',ok:g=>g.total>=100},
+  {id:'t500',e:'💎',n:'Imparable',d:'500 tareas completadas',ok:g=>g.total>=500},
+  {id:'p20',e:'⏰',n:'Puntual',d:'20 tareas hechas a tiempo',ok:g=>g.onTime>=20},
+  {id:'am',e:'🌅',n:'Madrugador',d:'Completa algo antes de las 8:00',ok:g=>g.early},
+  {id:'pr',e:'🏁',n:'Proyecto cerrado',d:'Termina todas las tareas de un proyecto',ok:g=>g.projDone},
+  {id:'d5',e:'⚡',n:'Día productivo',d:'5 tareas en un solo día',ok:g=>g.maxDay>=5},
+  {id:'hi',e:'🧊',n:'Salvado',d:'Un protector cuidó tu racha',ok:g=>g.saved}
+];
+const NIVELES=['Aprendiz','Ordenado','Constante','Enfocado','Disciplinado','Imparable','Maestro del tiempo','Leyenda'];
+const xpFor=n=>50*n*(n+1); /* experiencia total para pasar del nivel n al n+1 */
+const meta=()=>Math.max(1,+(S.settings&&S.settings.meta)||3);
+function taskXP(t){let x=10;if(t.prioridad==='P1')x+=10;else if(t.prioridad==='P2')x+=5;if(t.fecha&&t.completedAt&&iso(new Date(t.completedAt))<=t.fecha)x+=5;return x}
+function game(){
+  const T=today(),tI=iso(T),done=S.tasks.filter(t=>isDone(t)&&t.completedAt),M=meta();
+  const by={};done.forEach(t=>{const d=iso(new Date(t.completedAt));by[d]=(by[d]||0)+1});
+  const days=Object.keys(by).sort();
+  /* racha con protectores: se gana 1 cada 7 días cumplidos (máximo 2) y cubre un día sin actividad */
+  let run=0,best=0,real=0,ice=0,saved=false;const st={};
+  if(days.length){for(let d=new Date(days[0]+'T12:00');iso(d)<tI;d=addDays(d,1)){const k=iso(d);
+    if(by[k]){run++;real++;st[k]='on';if(real%7===0&&ice<2)ice++}
+    else if(ice>0&&run>0){ice--;st[k]='ice';saved=true}
+    else{run=0;real=0;st[k]='off'}
+    best=Math.max(best,run)}}
+  const todayDone=by[tI]||0;if(todayDone){run++;st[tI]='on';best=Math.max(best,run)}
+  const metaDays=Object.values(by).filter(n=>n>=M).length;
+  let xp=sum(done,taskXP)+metaDays*20,lvl=0;while(xp>=xpFor(lvl+1))lvl++;
+  const base=xpFor(lvl),next=xpFor(lvl+1);
+  const g={streak:run,best,ice,saved,st,todayDone,M,metaDays,total:done.length,xp,lvl:lvl+1,lvlName:NIVELES[Math.min(lvl,NIVELES.length-1)],lvlPct:(xp-base)/(next-base),toNext:next-xp,
+    onTime:done.filter(t=>t.fecha&&iso(new Date(t.completedAt))<=t.fecha).length,early:done.some(t=>new Date(t.completedAt).getHours()<8),
+    maxDay:Math.max(0,...Object.values(by)),projDone:S.projects.some(p=>{const l=S.tasks.filter(t=>t.proyectoId===p.id);return l.length>=3&&l.every(isDone)})};
+  g.earned=LOGROS.filter(l=>l.ok(g)).map(l=>l.id);
+  return g;
+}
+function weekStrip(g){const T=today(),s=startOfWeek(T),L=['L','M','X','J','V','S','D'];
+  return`<div class="gweek">${L.map((l,i)=>{const d=addDays(s,i),k=iso(d),fut=k>iso(T);const st=g.st[k]||(fut?'none':'off');
+    return`<span class="${k===iso(T)?'t':''}">${st==='none'?`<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="4" fill="var(--line)"/></svg>`:flame(16,st)}${l}</span>`}).join('')}</div>`}
+function ring(v,max,s=58){const r=24,c=2*Math.PI*r,p=Math.min(1,v/max);
+  return`<div class="gring" style="width:${s}px;height:${s}px"><svg width="${s}" height="${s}" viewBox="0 0 58 58" aria-hidden="true"><circle cx="29" cy="29" r="${r}" fill="none" stroke="var(--sunk)" stroke-width="6"/><circle cx="29" cy="29" r="${r}" fill="none" stroke="${p>=1?'var(--ok)':'var(--camel)'}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-p)}"/></svg><b class="num">${Math.min(v,99)}/${max}</b></div>`}
+function gameCard(){
+  const g=game(),lit=g.todayDone>0;
+  return`<button class="card gstrip" data-a="game" aria-label="Tu racha: ${g.streak} días. Toca para ver tus logros.">
+    <div class="gflame">${flame(46,lit?'on':'off',lit)}</div>
+    <div style="min-width:0"><div class="gstreak"><b class="num" style="font:900 26px/1 var(--f-d)">${g.streak}</b><span class="small" style="font-weight:800">${g.streak===1?'día de racha':'días de racha'}</span>${g.ice?`<span title="Protectores de racha" class="small">${'🧊'.repeat(g.ice)}</span>`:''}</div>
+      <div class="tiny ${lit?'muted':''}" style="${lit?'':'color:var(--claret);font-weight:800'}">${lit?(g.todayDone>=g.M?'¡Meta del día cumplida!':`Racha a salvo hoy · ${g.M-g.todayDone} para tu meta`):g.streak?'Completa 1 tarea hoy para no perderla':'Completa 1 tarea para encender tu racha'}</div>
+      ${weekStrip(g)}</div>
+    ${ring(g.todayDone,g.M)}
+  </button>`}
+function shGame(){
+  const g=game(),lit=g.todayDone>0;
+  return`<div style="text-align:center"><div style="display:inline-block">${flame(84,lit?'on':'off',lit)}</div>
+    <h2 id="shT" style="margin-top:4px">${g.streak} ${g.streak===1?'día':'días'} de racha</h2>
+    <div class="small muted">Récord: ${g.best} ${g.best===1?'día':'días'}${g.ice?` · ${g.ice} ${g.ice===1?'protector':'protectores'} 🧊`:''}</div>
+    <div style="display:flex;justify-content:center;margin-top:10px">${weekStrip(g)}</div></div>
+  <div class="card stack" style="margin-top:16px"><div class="row between"><span class="eyebrow">Nivel ${g.lvl}</span><span class="gbadge">${g.lvlName}</span></div>
+    <div class="row between small"><b class="num">${g.xp} XP</b><span class="muted">faltan ${g.toNext} XP</span></div><div class="bar"><i style="width:${g.lvlPct*100}%;background:var(--camel)"></i></div>
+    <span class="tiny faint">Cada tarea da 10 XP · urgente +10 · importante +5 · a tiempo +5 · meta del día +20</span></div>
+  <div class="card stack" style="margin-top:12px"><span class="eyebrow">Meta diaria</span>
+    <div class="chips">${[1,3,5,7].map(n=>chip(`${n} ${n===1?'tarea':'tareas'}`,g.M===n,`data-a="setMeta" data-v="${n}"`)).join('')}</div>
+    <span class="tiny faint">Elige algo que puedas cumplir aun en un día pesado. Lo importante es no romper la racha.</span></div>
+  <div class="sec" style="margin-top:16px">Logros <span class="n">${g.earned.length}/${LOGROS.length}</span></div>
+  <div class="logros" style="margin-top:10px">${LOGROS.map(l=>`<div class="logro ${g.earned.includes(l.id)?'':'off'}"><i>${l.e}</i><b>${esc(l.n)}</b><span>${esc(l.d)}</span></div>`).join('')}</div>
+  <div class="tiny faint" style="margin-top:14px;text-align:center">🧊 Cada 7 días de racha ganas un protector (máximo 2). Si un día no completas nada, uno se gasta solo y tu racha sigue.</div>
+  <div style="margin-top:16px"><button class="btn block" data-a="close">Listo</button></div>`}
+function confeti(){const c=document.createElement('div');c.className='confeti';const col=['#D4AF6A','#2E4A3B','#7B2F35','#F5BC4C','#B48E58'];
+  for(let i=0;i<38;i++){const p=document.createElement('i');p.style.left=Math.random()*100+'%';p.style.background=col[i%col.length];p.style.setProperty('--x',(Math.random()*160-80)+'px');p.style.setProperty('--r',(Math.random()*720-360)+'deg');p.style.animationDelay=(Math.random()*.4)+'s';c.appendChild(p)}
+  document.body.appendChild(c);setTimeout(()=>c.remove(),3200)}
+function celebrate(big,title,sub){const o=document.createElement('div');o.className='celebra';o.setAttribute('role','alertdialog');o.setAttribute('aria-label',title);
+  o.innerHTML=`<div class="box"><div class="big">${big}</div><h2>${esc(title)}</h2><div class="small muted" style="margin-top:6px">${esc(sub)}</div><button class="btn pri block" style="margin-top:16px">¡Vamos!</button></div>`;
+  const close=()=>{o.remove()};o.addEventListener('click',close);document.body.appendChild(o);confeti();setTimeout(close,4500)}
+function gameAfter(before,t){
+  const g=game();if(!S.game)S.game={seen:before.earned.slice()};
+  const fresh=g.earned.filter(id=>!S.game.seen.includes(id));if(fresh.length){S.game.seen=[...new Set([...S.game.seen,...fresh])];saveLocal();cloudPush()}
+  const xp=taskXP(t);
+  if(before.todayDone===0&&g.todayDone>0)return celebrate(flame(96,'on',true),g.streak>1?`¡${g.streak} días de racha!`:'¡Racha encendida!',g.streak>1?'Sigue así: mañana completa al menos una tarea.':'Vuelve mañana y completa una tarea para seguir sumando días.'),xp;
+  if(fresh.length){const l=LOGROS.find(x=>x.id===fresh[0]);return celebrate(`<span style="font-size:72px;line-height:1">${l.e}</span>`,`Nuevo logro: ${l.n}`,l.d),xp}
+  if(g.lvl>before.lvl)return celebrate(`<span style="font-size:72px;line-height:1">🏆</span>`,`¡Nivel ${g.lvl}!`,`Ahora eres ${g.lvlName}.`),xp;
+  if(before.todayDone<g.M&&g.todayDone>=g.M)return celebrate(`<span style="font-size:72px;line-height:1">🎯</span>`,'¡Meta del día!',`+20 XP extra. Llevas ${g.metaDays} ${g.metaDays===1?'día':'días'} cumpliendo tu meta.`),xp;
+  return xp;
 }
 function vProgress(){
   const T=today(),tI=iso(T),ws=iso(startOfWeek(T));
@@ -1164,7 +1292,7 @@ function renderSheet(first){
   if(!SH){closeSheet();return}
   const prev=$('#layer .glass');const st=prev?prev.scrollTop:0;
   const open=prev?$$('#layer details[open]').map(d=>d.dataset.k):[];
-  const html=({new:shNew,task:shTask,day:shDay,settings:shSettings,welcome:shWelcome,install:shInstall,goal:shGoal,project:shProject,area:shArea,gantt:shGantt}[SH.kind]||(()=>''))();
+  const html=({new:shNew,task:shTask,day:shDay,settings:shSettings,welcome:shWelcome,install:shInstall,goal:shGoal,project:shProject,area:shArea,gantt:shGantt,game:shGame}[SH.kind]||(()=>''))();
   if(!html){closeSheet();return}
   $('#layer').innerHTML=`<div class="layer" data-a="scrim"><div class="glass ${SH.kind==='gantt'?'wide':''}" role="dialog" aria-modal="true" aria-labelledby="shT" tabindex="-1">${html}</div></div>`;
   open.forEach(k=>{const d=$(`#layer details[data-k="${k}"]`);if(d)d.open=true});
@@ -1408,6 +1536,8 @@ document.addEventListener('click',e=>{
   const t=id?S.tasks.find(x=>x.id===id):null;
   switch(a){
     case'view':U.view=v;saveU();render();window.scrollTo(0,0);break;
+    case'game':openSheet('game');break;
+    case'setMeta':S.settings.meta=+v;save();renderSheet();renderView();break;
     case'goTasks':U.view='tasks';U.tf=v;U.tv='list';saveU();closeSheet();render();window.scrollTo(0,0);break;
     case'area':U.area=v;saveU();renderView();break;
     case'tf':U.tf=v;saveU();renderView();break;
