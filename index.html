@@ -358,6 +358,51 @@ details.more>div{padding:0 14px 14px}
 @keyframes spark{0%{opacity:0;transform:translate(0,5px)}25%{opacity:1}100%{opacity:0;transform:translate(1.5px,-8px) scale(.4)}}
 .fl-off{animation:breathe 2.6s ease-in-out infinite;transform-origin:50% 90%}
 @keyframes breathe{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.05) rotate(-2deg)}}
+/* avance de objetivos */
+.regla{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:15px}
+.regla input{width:84px;text-align:center;font-weight:900}
+.av-head{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;margin-bottom:12px}
+.av-ico{font-size:52px;line-height:1;animation:pop .5s cubic-bezier(.2,.9,.3,1.4)}
+.av-q{text-align:center;font-weight:800;color:var(--ink2);margin-bottom:10px}
+.av-num{display:grid;grid-template-columns:56px 1fr 56px;gap:10px;align-items:center}
+.av-num>button{height:56px;border-radius:18px;border:1px solid var(--line2);background:var(--linen);font:900 26px/1 var(--f-b);color:var(--forest);cursor:pointer}
+.av-num>button:active{transform:scale(.95)}
+.av-num label{display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,.55);border:1px solid var(--line);border-radius:20px;padding:8px 6px}
+.av-num input{border:0;background:transparent;text-align:center;font:900 40px/1.1 var(--f-d);width:100%;padding:0;box-shadow:none;color:var(--ink)}
+.av-num input:focus{outline:none}
+.av-num span{font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.av-comp{text-align:center;font-size:13.5px;margin-top:10px;color:var(--ink2)}
+.av-pts{display:flex;align-items:baseline;justify-content:center;gap:6px;margin-top:14px;color:var(--claret)}
+.av-pts b{font:900 34px/1 var(--f-d)}
+.av-pts span{font-weight:900}
+.av-bar{display:flex;height:12px;border-radius:999px;background:var(--sunk);overflow:hidden;margin:14px 0 8px}
+.av-bar i{display:block;height:100%;background:var(--forest);transition:width .3s}
+.av-bar i.add{background:repeating-linear-gradient(45deg,var(--camel),var(--camel) 6px,#D4AF6A 6px,#D4AF6A 12px)}
+.av-win{margin-top:10px;text-align:center;font-weight:900;color:var(--ok);background:rgba(79,123,91,.12);border-radius:12px;padding:8px}
+/* recompensas */
+.rw-hero{background:linear-gradient(160deg,#8C3A42 0%,#5E232B 100%);color:#FBEFE6;border-radius:24px;padding:20px 18px;display:flex;flex-direction:column;gap:8px;box-shadow:0 14px 30px rgba(123,47,53,.25)}
+.rw-bal{display:flex;align-items:center;gap:10px}
+.rw-bal b{font:900 44px/1 var(--f-d)}
+.rw-bal .coin{font-size:38px;animation:coin 3s ease-in-out infinite;display:inline-block}
+@keyframes coin{0%,80%,100%{transform:rotateY(0)}90%{transform:rotateY(180deg)}}
+.rw-sub{display:flex;gap:16px;font-size:13px;font-weight:700;color:#F1D9C9}
+.rw-sub b{color:#fff}
+.rw-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(min-width:620px){.rw-grid{grid-template-columns:repeat(3,1fr)}}
+.rw-card{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:16px 10px 12px;border-radius:20px;background:var(--card);border:1px solid var(--line);font:inherit;color:inherit}
+.rw-card.ok{border-color:rgba(180,142,88,.7);box-shadow:0 8px 20px rgba(180,142,88,.18)}
+.rw-card i{font-style:normal;font-size:40px;line-height:1}
+.rw-card b{font-size:14px;line-height:1.2}
+.rw-cost{font:900 14px/1 var(--f-b);color:var(--gold)}
+.rw-card .btn{margin-top:4px;width:100%}
+.rw-need{width:100%;display:flex;flex-direction:column;gap:4px;margin-top:4px}
+.rw-need .bar{height:6px}
+.rw-need span{font-size:11.5px;font-weight:800;color:var(--ink3)}
+.rw-edit{position:absolute;top:6px;right:8px;border:0;background:transparent;font:900 18px/1 var(--f-b);color:var(--ink3);cursor:pointer;padding:4px}
+.rw-add{border-style:dashed;cursor:pointer;justify-content:center}
+.rw-add i{color:var(--ink3)}
+.rw-confirm{display:grid;grid-template-columns:1fr auto;gap:6px 12px;background:rgba(255,255,255,.5);border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:14px;font-weight:800}
+.rw-confirm b{text-align:right;font:900 18px/1.2 var(--f-d)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -703,7 +748,7 @@ function mergeRemote(str,ts){
   const del=Object.assign({},R.deleted||{},L.deleted||{});
   const pick=(l,r)=>((r.updatedAt||'')>(l.updatedAt||'')?r:l);
   const mg=(la,ra)=>{const m=new Map();(ra||[]).forEach(x=>m.set(x.id,x));(la||[]).forEach(x=>m.set(x.id,m.has(x.id)?pick(x,m.get(x.id)):x));return[...m.values()].filter(x=>{if(!del[x.id])return true;if(Date.parse(x.updatedAt||0)>del[x.id]){delete del[x.id];return true}return false})};
-  const M=normalize(Object.assign({},L,{tasks:mg(L.tasks,R.tasks),projects:mg(L.projects,R.projects),goals:mg(L.goals,R.goals),savings:mg(L.savings,R.savings),investments:mg(L.investments,R.investments),areas:mg(L.areas,R.areas),sprints:mg(L.sprints,R.sprints),deleted:del,demo:false}));
+  const M=normalize(Object.assign({},L,{tasks:mg(L.tasks,R.tasks),projects:mg(L.projects,R.projects),goals:mg(L.goals,R.goals),savings:mg(L.savings,R.savings),rewards:mg(L.rewards,R.rewards),redemptions:mg(L.redemptions,R.redemptions),investments:mg(L.investments,R.investments),areas:mg(L.areas,R.areas),sprints:mg(L.sprints,R.sprints),deleted:del,demo:false}));
   const seen=new Set();M.logs=[...(R.logs||[]),...(L.logs||[])].filter(l=>{const k=l.ts+'|'+l.taskId+'|'+l.a;if(seen.has(k))return false;seen.add(k);return true}).sort((a,b)=>a.ts>b.ts?1:-1).slice(-400);
   M.ts=Math.max(L.ts||0,ts||0);S=M;setRemoteTs(ts);saveLocal();renderAll();
 }
@@ -829,7 +874,7 @@ function createTask(d){
   const t=mkTask({titulo:d.titulo.trim(),notas:d.notas||'',areaId:d.areaId||S.areas[0].id,proyectoId:d.proyectoId||null,prioridad:d.prioridad||'P3',est:+d.est||0,fecha:d.fecha||null,inicio:d.fecha||null,hora:d.fecha?(d.hora||null):null,rec:d.fecha?(d.rec||null):null,tags:d.tags||[]});
   if(t.titulo.charAt(0))t.titulo=t.titulo.charAt(0).toUpperCase()+t.titulo.slice(1);
   S.tasks.push(t);log(t.id,'create',t.areaId);
-  if(d.goalId){const g=S.goals.find(x=>x.id===d.goalId);if(g){g.tasks=g.tasks||[];g.tasks.push(t.id);g.updatedAt=new Date().toISOString()}}
+  if(d.goalId){const g=S.goals.find(x=>x.id===d.goalId);if(g){g.tasks=g.tasks||[];g.tasks.push(t.id);g.updatedAt=new Date().toISOString();if(+d.compCant>0)t.comp={cant:+d.compCant,u:compUnit(g)}}}
   const want=t.fecha&&(d.gcalTouched?!!d.gcal:gcWant(t.fecha,t.hora));
   if(want){if(gcReady())gcPush(t);else t.gcalWanted=true}
   save();
@@ -859,6 +904,7 @@ function complete(t){
   if(t.gcalId&&!t.gcalSeries)gcUpdate(t,{summary:'✓ ◈ '+t.titulo,useDefaultReminders:false});
   const xp=gameAfter(gBefore,t);
   toast(`Completada · +${xp} XP`,clone?`${t.titulo} · siguiente: ${relDay(clone.fecha)}`:t.titulo,'ok',{label:'Deshacer',fn:()=>{if(clone){S.tasks=S.tasks.filter(x=>x!==clone);S.goals.forEach(g=>g.tasks=(g.tasks||[]).filter(x=>x!==clone.id))}if(isDone(t))complete(t)}});
+  {const gl=S.goals.filter(g=>(g.tasks||[]).includes(t.id));if(gl.length)setTimeout(()=>openSheet('avance',t.id,{g:gl[0].id}),380)}
 }
 function setBoard(t,col){
   if(col==='done'){if(!isDone(t))complete(t);return}
@@ -1094,9 +1140,10 @@ function goalProgress(g){const l=S.tasks.filter(t=>(g.tasks||[]).includes(t.id)&
 function projProgress(p){const l=S.tasks.filter(t=>t.proyectoId===p.id&&!t.archived);return{l,p:l.length?l.filter(isDone).length/l.length:0}}
 const nextStep=list=>list.filter(t=>!isDone(t)).sort((a,b)=>(a.fecha||'9999')>(b.fecha||'9999')?1:-1)[0];
 function vPlan(){
-  let h=`<div class="seg" role="group" aria-label="Sección">${[['goals','Objetivos'],['projects','Proyectos'],['progress','Progreso']].map(([k,l])=>`<button class="${U.planMode===k?'on':''}" data-a="pmode" data-v="${k}" aria-pressed="${U.planMode===k}">${l}</button>`).join('')}</div>`;
+  let h=`<div class="seg" role="group" aria-label="Sección">${[['goals','Objetivos'],['projects','Proyectos'],['rewards','Premios'],['progress','Progreso']].map(([k,l])=>`<button class="${U.planMode===k?'on':''}" data-a="pmode" data-v="${k}" aria-pressed="${U.planMode===k}">${l}</button>`).join('')}</div>`;
   if(U.planMode==='goals')return h+vGoals();
   if(U.planMode==='projects')return h+vProjects();
+  if(U.planMode==='rewards')return h+vRewards();
   return h+vProgress();
 }
 function vGoals(){
@@ -1176,6 +1223,7 @@ function vBI(){
    <div class="small" style="padding-top:10px;border-top:1px solid var(--line)">Esta semana: <b>${B.createdW}</b> anotadas · <b>${B.doneW}</b> hechas</div>
    ${bestBand?`<div class="small">Completas más cosas en la <b>${bestBand}</b>. Pon ahí lo importante.</div><canvas class="chart" id="cBands" style="height:130px" role="img" aria-label="Tareas completadas por horario"></canvas>`:''}
   </div>`;
+  h+=rewardStats();
   return h;
 }
 function drawBI(){
@@ -1226,7 +1274,7 @@ function game(){
     best=Math.max(best,run)}}
   const todayDone=by[tI]||0;if(todayDone){run++;st[tI]='on';best=Math.max(best,run)}
   const metaDays=Object.values(by).filter(n=>n>=M).length;
-  let xp=sum(done,taskXP)+metaDays*20,lvl=0;while(xp>=xpFor(lvl+1))lvl++;
+  let xp=sum(done,taskXP)+metaDays*20+sum(S.goals,x=>(x.log||[]).length*10+((+x.meta>0&&+x.actual>=+x.meta)?100:0)),lvl=0;while(xp>=xpFor(lvl+1))lvl++;
   const base=xpFor(lvl),next=xpFor(lvl+1);
   const g={streak:run,best,ice,saved,st,todayDone,M,metaDays,total:done.length,xp,lvl:lvl+1,lvlName:NIVELES[Math.min(lvl,NIVELES.length-1)],lvlPct:(xp-base)/(next-base),toNext:next-xp,
     onTime:done.filter(t=>t.fecha&&iso(new Date(t.completedAt))<=t.fecha).length,early:done.some(t=>new Date(t.completedAt).getHours()<8),
@@ -1386,6 +1434,114 @@ document.addEventListener('input',e=>{const el=e.target;
   if(el.dataset.fbind&&SH){SH.d[el.dataset.fbind]=el.value;return}
   if(el.dataset.fedit){const x=finById(el.dataset.id);if(!x)return;const k=el.dataset.fedit;x[k]=k==='limite'?(el.value||null):(+el.value||0);touch(x);clearTimeout(el._t);el._t=setTimeout(()=>{save();renderView()},400)}
 });
+/* ══════════════ avance de objetivos: compromisos y medición al completar ══════════════ */
+const U_LBL={min:'minutos',pag:'páginas',veces:'veces',km:'km',h:'horas','$':'pesos','%':'%',tareas:'tareas',pts:'puntos'};
+const U_ICO={min:'⏱️',pag:'📖',veces:'🔁',km:'🏃',h:'⏳','$':'💵','%':'📊',tareas:'✅',pts:'⭐'};
+const isPts=g=>g&&g.modo==='puntos'&&g.regla;
+const compUnit=g=>isPts(g)?g.regla.base:(g.unidad||'veces');
+const ptsFor=(g,c)=>Math.round((+c||0)/(+g.regla.cada||1)*(+g.regla.pts||0)*10)/10;
+const stepFor=u=>({min:5,pag:5,km:.5,h:.25,'$':100,'%':5}[u]||1);
+const nfmt=n=>{const v=Math.round((+n||0)*100)/100;return String(v)};
+function reglaBlk(d){
+  return blk('¿Cómo ganas puntos?',`<div class="chips" style="margin-bottom:10px">${[['min','Por tiempo'],['pag','Por páginas'],['veces','Por veces']].map(([v,l])=>dset('rBase',v,(d.rBase||'min')===v,l)).join('')}</div>
+   <div class="regla">Cada <input type="number" inputmode="decimal" data-bind="rCada" value="${esc(d.rCada??30)}" aria-label="Cantidad"> <b>${U_LBL[d.rBase||'min']}</b> = <input type="number" inputmode="decimal" data-bind="rPts" value="${esc(d.rPts??10)}" aria-label="Puntos"> <b>puntos</b></div>`,
+   'Al completar cada tarea te preguntaré cuánto le dedicaste y sumaré los puntos solos.')}
+function compBlk(d){const g=S.goals.find(x=>x.id===d.goalId);if(!g)return'';const u=compUnit(g);
+  const opts=u==='min'?[15,30,45,60]:u==='pag'?[10,20,30,50]:u==='km'?[2,3,5,10]:u==='h'?[.5,1,2]:[1,2,5];
+  return blk(`Tu compromiso para “${esc(g.titulo)}”`,`<div class="chips">${opts.map(v=>dset('compCant',v,+d.compCant===v,`${nfmt(v)} ${U_LBL[u]||u}`)).join('')}</div>
+   <div class="regla" style="margin-top:8px"><input type="number" inputmode="decimal" data-bind="compCant" value="${esc(d.compCant||'')}" placeholder="Otro" aria-label="Compromiso"> <b>${U_LBL[u]||esc(u)}</b>${isPts(g)&&+d.compCant?` <span class="muted">= ${nfmt(ptsFor(g,d.compCant))} puntos</span>`:''}</div>`,
+   'Lo que te comprometes a hacer. Al completar la tarea podrás ajustar lo que realmente hiciste.')}
+function compTaskBlk(t,gl){const g=gl[0],u=compUnit(g),c=t.comp&&t.comp.cant;
+  return blk(`Compromiso · ${esc(g.titulo)}`,`<div class="regla"><input type="number" inputmode="decimal" data-cbind="${t.id}" value="${c?esc(c):''}" placeholder="Ej. ${u==='min'?30:u==='pag'?20:u==='km'?5:1}" aria-label="Compromiso"> <b>${U_LBL[u]||esc(u)}</b>${isPts(g)&&c?` <span class="muted">= ${nfmt(ptsFor(g,c))} puntos</span>`:''}</div>`)}
+function shAvance(){const t=S.tasks.find(x=>x.id===SH.arg),gl=S.goals.filter(g=>(g.tasks||[]).includes(SH.arg));if(!t||!gl.length)return'';
+  const d=SH.d,g=gl.find(x=>x.id===d.g)||gl[0];d.g=g.id;const u=compUnit(g),pts=isPts(g);
+  if(d.v==null)d.v=t.comp&&t.comp.cant?+t.comp.cant:'';
+  const comp=t.comp&&t.comp.cant?+t.comp.cant:null;
+  return`<div class="av-head"><span class="av-ico">${U_ICO[u]||'🎯'}</span><span class="eyebrow">Avance de tu objetivo</span><h2 id="shT">${esc(g.titulo)}</h2></div>
+  ${gl.length>1?`<div class="chips" style="justify-content:center;margin-bottom:10px">${gl.map(x=>chip(esc(x.titulo),x.id===g.id,`data-a="avGoal" data-v="${x.id}"`)).join('')}</div>`:''}
+  <div class="av-q">${pts?(u==='min'?'¿Cuánto tiempo le dedicaste?':u==='pag'?'¿Cuántas páginas hiciste?':'¿Cuántas veces lo hiciste?'):`¿Cuántos ${esc(U_LBL[u]||u)} lograste?`}</div>
+  <div class="av-num"><button data-a="avStep" data-v="${-stepFor(u)}" aria-label="Menos">−</button><label><input type="number" inputmode="decimal" id="avIn" value="${esc(d.v)}" placeholder="0"><span>${esc(U_LBL[u]||u)}</span></label><button data-a="avStep" data-v="${stepFor(u)}" aria-label="Más">+</button></div>
+  ${comp?`<div class="av-comp">Tu compromiso: <b>${nfmt(comp)} ${esc(U_LBL[u]||u)}</b> <span id="avCmp">${avCmp(d.v,comp)}</span></div>`:''}
+  <div id="avPrev">${avPrev(g,d.v)}</div>
+  <button class="btn pri block" data-a="avSave" style="margin-top:14px">${ic('check',18,3)} Sumar a mi objetivo</button>
+  <button class="btn ghost block" data-a="close" style="margin-top:6px">Ahora no</button>`}
+function avCmp(v,c){v=+v||0;return v>=c?'· <b style="color:var(--ok)">¡Cumplido! 💪</b>':v>0?`· llevas ${Math.round(v/c*100)}%`:''}
+function avPrev(g,v){const add=isPts(g)?ptsFor(g,v):(+v||0),a0=+g.actual||0,a1=a0+add,m=+g.meta||0,p0=m?Math.min(1,a0/m):0,p1=m?Math.min(1,a1/m):0,un=isPts(g)?'puntos':(U_LBL[g.unidad]||g.unidad);
+  return`${isPts(g)?`<div class="av-pts"><b class="num">+${nfmt(add)}</b><span>puntos</span></div><div class="tiny faint" style="text-align:center">Cada ${nfmt(g.regla.cada)} ${U_LBL[g.regla.base]} = ${nfmt(g.regla.pts)} puntos</div>`:''}
+  <div class="av-bar"><i style="width:${p0*100}%"></i><i class="add" style="width:${Math.max(0,p1-p0)*100}%"></i></div>
+  <div class="row between small"><span class="muted">${nfmt(a0)} → <b style="color:var(--ink)">${nfmt(a1)}</b> de ${nfmt(m)} ${esc(un)}</span><b class="num" style="color:var(--forest)">${Math.round(p1*100)}%</b></div>
+  ${a0<m&&a1>=m?'<div class="av-win">🏆 ¡Con esto logras tu objetivo!</div>':''}`}
+function avRefresh(){const t=S.tasks.find(x=>x.id===SH.arg),g=S.goals.find(x=>x.id===SH.d.g);if(!t||!g)return;const p=$('#avPrev');if(p)p.innerHTML=avPrev(g,SH.d.v);const c=$('#avCmp');if(c&&t.comp)c.innerHTML=avCmp(SH.d.v,+t.comp.cant)}
+function addAvance(g,cant,taskId){const v=+cant||0;if(v<=0)return null;const add=isPts(g)?ptsFor(g,v):v,was=(+g.actual||0)>=(+g.meta||0);
+  g.actual=+((+g.actual||0)+add).toFixed(2);g.log=g.log||[];g.log.push({id:uid('v'),fecha:tISO(),ts:new Date().toISOString(),cant:v,u:compUnit(g),pts:isPts(g)?add:null,taskId:taskId||null});g.updatedAt=new Date().toISOString();
+  return{add,reached:!was&&g.actual>=g.meta}}
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a,v=el.dataset.v;if(!/^av|^gbase$/.test(a))return;
+  if(a==='gbase'){const g=S.goals.find(x=>x.id===SH.arg);if(!g)return;g.modo='puntos';g.unidad='pts';g.regla=Object.assign({cada:30,pts:10},g.regla||{},{base:v});g.updatedAt=new Date().toISOString();save();renderSheet();renderView();return}
+  if(a==='avGoal'){SH.d.g=v;SH.d.v=null;renderSheet();return}
+  if(a==='avStep'){SH.d.v=Math.max(0,+((+SH.d.v||0)+ +v).toFixed(2));const i=$('#avIn');if(i)i.value=SH.d.v;avRefresh();return}
+  if(a==='avSave'){const g=S.goals.find(x=>x.id===SH.d.g);if(!g)return;const r=addAvance(g,SH.d.v,SH.arg);if(!r){toast('Escribe cuánto hiciste','','warn');return}
+    save();closeSheet();renderAll();
+    if(r.reached&&typeof celebrate==='function')celebrate('<span style="font-size:72px;line-height:1">🏆</span>','¡Objetivo logrado!',`${g.titulo} · +100 XP`);
+    else toast(`+${nfmt(r.add)} ${isPts(g)?'puntos':(U_LBL[g.unidad]||g.unidad)} · +10 XP`,g.titulo,'ok');return}
+});
+document.addEventListener('input',e=>{const el=e.target;
+  if(el.id==='avIn'&&SH&&SH.kind==='avance'){SH.d.v=el.value;avRefresh();return}
+  if(el.dataset.cbind){const t=S.tasks.find(x=>x.id===el.dataset.cbind);if(!t)return;const g=S.goals.find(x=>(x.tasks||[]).includes(t.id));const n=+el.value;t.comp=n>0?{cant:n,u:g?compUnit(g):''}:null;t.updatedAt=new Date().toISOString();clearTimeout(el._t);el._t=setTimeout(()=>{save()},400)}
+  if(el.dataset.rbind){const g=S.goals.find(x=>x.id===SH.arg);if(!g||!g.regla)return;g.regla[el.dataset.rbind]=+el.value||0;g.updatedAt=new Date().toISOString();clearTimeout(el._t);el._t=setTimeout(()=>{save();renderView()},400)}
+});
+/* ══════════════ recompensas: gana monedas con tus tareas y objetivos, canjéalas por gustos ══════════════ */
+const RW_DEF=[['r_anime','📺','Un capítulo de tu anime favorito',60],['r_net','🌐','30 min de vagar en internet',40],['r_siesta','😴','Siesta sin culpa',80],['r_game','🎮','2 horas de Minecraft o tu juego favorito',150],['r_food','🍕','Tu comida favorita',200],['r_peli','🎬','Maratón de películas',300]];
+const RW_EMOJI=['🎬','📺','🌐','🎮','🍕','😴','🛍️','☕','🍦','🎧','📚','🛁','🏖️','🍺','🎤','⚽'];
+const rws=()=>S.rewards||(S.rewards=RW_DEF.map(([id,e,n,c])=>({id,emoji:e,nombre:n,costo:c,updatedAt:'2026-01-01T00:00:00.000Z'})));
+const rdm=()=>S.redemptions||(S.redemptions=[]);
+function wallet(){const g=game(),spent=sum(rdm(),r=>r.costo);return{earned:g.xp,spent,bal:g.xp-spent}}
+function vRewards(){const W=wallet(),list=rws().slice().sort((a,b)=>a.costo-b.costo),recent=rdm().slice().sort((a,b)=>a.ts<b.ts?1:-1).slice(0,5);
+  let h=`<section class="rw-hero"><span class="eyebrow" style="color:#F1D9C9">Tus monedas</span>
+    <div class="rw-bal"><span class="coin">🪙</span><b class="num">${W.bal}</b></div>
+    <div class="rw-sub"><span>Ganadas <b class="num">${W.earned}</b></span><span>Canjeadas <b class="num">${W.spent}</b></span></div>
+    <div class="tiny" style="color:#EBD3C4">Ganas monedas al completar tareas (10–30), avanzar un objetivo (+10), cumplir tu meta del día (+20) y lograr un objetivo (+100).</div></section>
+  <div class="sec">Canjear <span class="n">${list.length}</span></div>
+  <div class="rw-grid">${list.map(r=>{const ok=W.bal>=r.costo,pct=Math.min(100,Math.round(Math.max(0,W.bal)/r.costo*100));
+    return`<article class="rw-card ${ok?'ok':''}"><button class="rw-edit" data-a="rwEdit" data-id="${r.id}" aria-label="Editar recompensa">⋯</button><i>${r.emoji}</i><b>${esc(r.nombre)}</b><span class="rw-cost">🪙 ${r.costo}</span>
+      ${ok?`<button class="btn pri sm" data-a="rwAsk" data-id="${r.id}">Canjear</button>`:`<div class="rw-need"><div class="bar"><i style="width:${pct}%;background:var(--camel)"></i></div><span>Te faltan ${r.costo-Math.max(0,W.bal)}</span></div>`}</article>`}).join('')}
+    <button class="rw-card rw-add" data-a="rwNew"><i>＋</i><b>Nueva recompensa</b><span class="tiny faint">Algo que disfrutes</span></button></div>`;
+  if(recent.length)h+=`<div class="sec">Últimos canjes</div><div class="card stack" style="gap:0">${recent.map(r=>`<div class="row between small" style="padding:9px 0;border-top:1px solid var(--line)"><span>${r.emoji} ${esc(r.nombre)}</span><span class="muted num">${fmtD(r.ts.slice(0,10))} · −${r.costo}</span></div>`).join('')}</div>`;
+  return h}
+function shCanje(){const r=rws().find(x=>x.id===SH.arg);if(!r)return'';const W=wallet();
+  return`<div class="av-head"><span class="av-ico" style="font-size:64px">${r.emoji}</span><span class="eyebrow">Recompensa</span><h2 id="shT">${esc(r.nombre)}</h2></div>
+   <div class="rw-confirm"><span>Cuesta</span><b>🪙 ${r.costo}</b><span>Te quedan</span><b>🪙 ${W.bal-r.costo}</b></div>
+   <button class="btn pri block" data-a="rwDo" data-id="${r.id}" ${W.bal>=r.costo?'':'disabled'}>¡Me la gané! Canjear</button><button class="btn ghost block" data-a="close" style="margin-top:6px">Todavía no</button>`}
+function shPremio(){const r=SH.arg?rws().find(x=>x.id===SH.arg):null,d=SH.d;
+  return shHead(r?'Editar recompensa':'Nueva recompensa',r?esc(r.nombre):'¿Con qué te premias?')+
+  blk('Nombre',`<input type="text" data-fbind="nombre" value="${esc(d.nombre||'')}" placeholder="Ej. Un café de especialidad" autocomplete="off">`)+
+  blk('Ícono',`<div class="fin-emojis">${RW_EMOJI.map(e=>`<button class="${d.emoji===e?'on':''}" data-a="rwSet" data-k="emoji" data-v="${e}">${e}</button>`).join('')}</div>`)+
+  blk('¿Cuántas monedas cuesta?',`<div class="chips">${[30,60,100,150,200,300,500].map(n=>chip(`🪙 ${n}`,+d.costo===n,`data-a="rwSet" data-k="costo" data-v="${n}"`)).join('')}</div>`,'Entre más grande el gusto, más monedas. Una tarea normal da 10–15.')+
+  `<button class="btn pri block" data-a="rwSave">${r?'Guardar':'Crear recompensa'}</button>`+
+  (r?`<button class="btn danger block ${d.arm?'armed':''}" data-a="rwDel" data-id="${r.id}" style="margin-top:8px">${d.arm?'Toca otra vez para eliminar':'Eliminar recompensa'}</button>`:'')}
+function rewardStats(){const all=rdm();const W=wallet();if(!all.length&&!W.earned)return'';
+  const from30=iso(addDays(today(),-29)),m30=all.filter(r=>r.ts.slice(0,10)>=from30);
+  const by={};all.forEach(r=>{const k=r.rewardId;by[k]=by[k]||{n:0,c:0,e:r.emoji,nm:r.nombre};by[k].n++;by[k].c+=r.costo});
+  const rows=Object.values(by).sort((a,b)=>b.n-a.n),mx=rows.length?rows[0].n:1,fav=rows[0];
+  const ganadas30=(()=>{const done=S.tasks.filter(t=>isDone(t)&&t.completedAt&&iso(new Date(t.completedAt))>=from30);return sum(done,taskXP)+sum(S.goals,g=>(g.log||[]).filter(l=>l.fecha>=from30).length*10)})();
+  const gast30=sum(m30,r=>r.costo);
+  return`<div class="card stack"><h3>Tus recompensas</h3>
+   <div class="grid2"><div><span class="eyebrow">Disponibles</span><div class="num" style="font:900 26px/1.1 var(--f-d)">🪙 ${W.bal}</div></div><div><span class="eyebrow">Canjes · 30 días</span><div class="num" style="font:900 26px/1.1 var(--f-d)">${m30.length}</div></div></div>
+   ${fav?`<div class="small">Tu favorita: <b>${fav.e} ${esc(fav.nm)}</b> (${fav.n} ${fav.n===1?'vez':'veces'})</div>`:'<div class="small muted">Aún no canjeas nada. Ve a Plan → Premios cuando te ganes algo.</div>'}
+   ${rows.map(r=>`<div class="stack" style="gap:4px"><div class="row between small"><span>${r.e} ${esc(r.nm)}</span><b class="num">${r.n}× · 🪙 ${r.c}</b></div><div class="bar"><i style="width:${r.n/mx*100}%;background:var(--claret)"></i></div></div>`).join('')}
+   <span class="tiny faint">Últimos 30 días: ganaste ~${ganadas30} monedas con tareas y objetivos, y gastaste ${gast30}. ${ganadas30&&gast30>ganadas30?'Estás gastando más de lo que ganas: ¡a completar tareas!':'Buen equilibrio entre esfuerzo y premio.'}</span></div>`}
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a,id=el.dataset.id,v=el.dataset.v;if(!/^rw/.test(a))return;
+  if(a==='rwAsk'){openSheet('canje',id);return}
+  if(a==='rwNew'){openSheet('premio',null,{emoji:'🎬',costo:100,nombre:''});return}
+  if(a==='rwEdit'){const r=rws().find(x=>x.id===id);if(r)openSheet('premio',id,{emoji:r.emoji,costo:r.costo,nombre:r.nombre});return}
+  if(a==='rwSet'){SH.d[el.dataset.k]=el.dataset.k==='costo'?+v:v;renderSheet();return}
+  if(a==='rwSave'){const d=SH.d,n=(d.nombre||'').trim();if(!n){toast('Ponle un nombre','','warn');return}const now=new Date().toISOString();
+    if(SH.arg){const r=rws().find(x=>x.id===SH.arg);if(r)Object.assign(r,{nombre:n,emoji:d.emoji,costo:+d.costo||100,updatedAt:now})}else rws().push({id:uid('r'),nombre:n,emoji:d.emoji||'🎁',costo:+d.costo||100,updatedAt:now});
+    save();closeSheet();renderView();toast('Recompensa guardada',n,'ok');return}
+  if(a==='rwDel'){if(!SH.d.arm){SH.d.arm=1;renderSheet();return}S.deleted=S.deleted||{};S.deleted[id]=Date.now();S.rewards=rws().filter(x=>x.id!==id);save();closeSheet();renderView();return}
+  if(a==='rwDo'){const r=rws().find(x=>x.id===id),W=wallet();if(!r||W.bal<r.costo)return;const now=new Date().toISOString();
+    rdm().push({id:uid('c'),rewardId:r.id,nombre:r.nombre,emoji:r.emoji,costo:r.costo,ts:now,updatedAt:now});save();closeSheet();renderView();
+    if(typeof celebrate==='function')celebrate(`<span style="font-size:76px;line-height:1">${r.emoji}</span>`,'¡A disfrutar!',`${r.nombre}. Te lo ganaste. Te quedan 🪙 ${W.bal-r.costo}.`);return}
+});
 function vProgress(){
   const T=today(),tI=iso(T),ws=iso(startOfWeek(T));
   const due=live().filter(t=>t.fecha&&t.fecha>=ws&&t.fecha<=tI);
@@ -1453,7 +1609,7 @@ function renderSheet(first){
   if(!SH){closeSheet();return}
   const prev=$('#layer .glass');const st=prev?prev.scrollTop:0;
   const open=prev?$$('#layer details[open]').map(d=>d.dataset.k):[];
-  const html=({new:shNew,task:shTask,day:shDay,settings:shSettings,welcome:shWelcome,install:shInstall,goal:shGoal,project:shProject,area:shArea,gantt:shGantt,game:shGame,finNew:shFinNew,fin:shFin}[SH.kind]||(()=>''))();
+  const html=({new:shNew,task:shTask,day:shDay,settings:shSettings,welcome:shWelcome,install:shInstall,goal:shGoal,project:shProject,area:shArea,gantt:shGantt,game:shGame,finNew:shFinNew,fin:shFin,avance:shAvance,canje:shCanje,premio:shPremio}[SH.kind]||(()=>''))();
   if(!html){closeSheet();return}
   $('#layer').innerHTML=`<div class="layer" data-a="scrim"><div class="glass ${SH.kind==='gantt'?'wide':''}" role="dialog" aria-modal="true" aria-labelledby="shT" tabindex="-1">${html}</div></div>`;
   open.forEach(k=>{const d=$(`#layer details[data-k="${k}"]`);if(d)d.open=true});
@@ -1476,7 +1632,7 @@ function newDraft(kind,preset){
   const area=U.area!=='all'?U.area:S.areas[0].id;
   if(kind==='task'){const d=Object.assign({tab:'task',titulo:'',areaId:area,fecha:tISO(),hora:null,prioridad:'P3',est:0,rec:null,proyectoId:null,goalId:null,notas:''},preset||{});d.gcal=gcDefault(d.fecha,d.hora);return d}
   if(kind==='project')return{tab:'project',nombre:'',areaId:area,inicio:tISO(),dur:30};
-  if(kind==='goal')return{tab:'goal',titulo:'',areaId:area,meta:100,unidad:'%',actual:0,plazo:90};
+  if(kind==='goal')return{rBase:'min',rCada:30,rPts:10,tab:'goal',titulo:'',areaId:area,meta:100,unidad:'%',actual:0,plazo:90};
 }
 function gcSwitch(d){
   if(!d.fecha)return'';
@@ -1492,6 +1648,7 @@ function shNew(){
     return shHead('Crear','Nueva tarea')+tabs+
     blk('¿Qué hay que hacer?',`<input type="text" data-bind="titulo" data-focus value="${esc(d.titulo)}" placeholder="Ej. Pagar el servicio de luz" enterkeyhint="done" aria-label="Título de la tarea">`)+
     blk('¿Cuándo?',dateChips('fecha',d.fecha))+
+    (d.goalId?compBlk(d):'')+
     gcSwitch(d)+
     moreBox('opts',`Más detalles${nOpt?` · ${nOpt}`:''}`,
       (d.fecha?blk('Hora',hourChips('hora',d.hora)):'')+
@@ -1515,6 +1672,7 @@ function shNew(){
     return shHead('Crear','Nuevo objetivo')+tabs+
     blk('¿Qué quieres lograr?',`<input type="text" data-bind="titulo" data-focus value="${esc(d.titulo)}" placeholder="Ej. Correr 100 km este trimestre" aria-label="Objetivo">`)+
     blk('¿Cómo lo vas a medir?',`<div class="chips">${[['%','Porcentaje'],['tareas','Tareas'],['h','Horas'],['km','Kilómetros'],['$','Dinero'],['pts','Puntos']].map(([v,l])=>dset('unidad',v,d.unidad===v,l)).join('')}</div>`)+
+    (d.unidad==='pts'?reglaBlk(d):'')+
     blk('Números',`<div class="grid2"><label class="tiny faint">Llevas<input type="number" inputmode="decimal" data-bind="actual" value="${d.actual}" style="margin-top:4px"></label><label class="tiny faint">Meta<input type="number" inputmode="decimal" data-bind="meta" value="${d.meta}" style="margin-top:4px"></label></div>`,'El avance se calcula como “llevas ÷ meta”.')+
     blk('¿Para cuándo?',`<div class="chips">${[[30,'1 mes'],[90,'3 meses'],[180,'6 meses'],[Math.max(1,diffDays(today(),new Date(today().getFullYear(),11,31))),'Fin de año']].map(([v,l])=>dset('plazo',v,+d.plazo===v,l)).join('')}</div>`)+
     blk('Área',areas('areaId'))+
@@ -1536,6 +1694,7 @@ function shTask(){
   blk(`Fecha · ${t.fecha?relDay(t.fecha):'sin fecha'}${t.hora?' · '+t.hora:''}${t.rec?' · ↻ '+REC[t.rec].toLowerCase():''}`,`<div class="chips">${tset('fecha',iso(T),t.fecha===iso(T),'Hoy')}${tset('fecha',iso(addDays(T,1)),t.fecha===iso(addDays(T,1)),'Mañana')}${t.fecha?tset('fecha',iso(addDays(parseISO(t.fecha),7)),false,'Una semana después'):''}${tset('fecha','',!t.fecha,'Sin fecha')}</div><label class="tiny faint">Otra fecha<input type="date" data-tbind="fecha" ${X} value="${t.fecha||''}" style="margin-top:4px"></label>`)+
   (t.fecha?blk('Hora',hourChips('hora',t.hora,'tset',X)):'')+
   `<div class="blk">${gRow}</div>`+
+  (goals.length&&!isDone(t)?compTaskBlk(t,goals):'')+
   moreBox('det','Más detalles',
     blk('Prioridad',`<div class="chips">${Object.keys(PRIO).map(p=>tset('prioridad',p,t.prioridad===p,PRIO[p])).join('')}</div>`)+
     blk('Estado',`<div class="chips">${BOARD.filter(c=>c.id!=='done').map(c=>tset('board',c.id,!isDone(t)&&boardOf(t).id===c.id,c.l)).join('')}</div>`,'“En curso” sirve para el tablero de Tareas.')+
@@ -1568,6 +1727,9 @@ function shGoal(){
   const cand=pending().filter(t=>!(g.tasks||[]).includes(t.id)&&t.areaId===g.areaId).slice(0,20);
   return shHead('Objetivo',esc(g.titulo))+
   blk(`Avance (${esc(g.unidad)})`,`<div class="grid2"><label class="tiny faint">Llevas<input type="number" inputmode="decimal" data-gbind="actual" value="${g.actual}" style="margin-top:4px"></label><label class="tiny faint">Meta<input type="number" inputmode="decimal" data-gbind="meta" value="${g.meta}" style="margin-top:4px"></label></div>`)+
+  (isPts(g)?blk('Cómo ganas puntos',`<div class="chips" style="margin-bottom:10px">${[['min','Por tiempo'],['pag','Por páginas'],['veces','Por veces']].map(([v,l])=>chip(l,g.regla.base===v,`data-a="gbase" data-v="${v}"`)).join('')}</div><div class="regla">Cada <input type="number" inputmode="decimal" data-rbind="cada" value="${g.regla.cada}"> <b>${U_LBL[g.regla.base]}</b> = <input type="number" inputmode="decimal" data-rbind="pts" value="${g.regla.pts}"> <b>puntos</b></div>`)
+    :g.unidad==='pts'?blk('Ganar puntos automáticamente',`<div class="chips">${[['min','Por tiempo'],['pag','Por páginas'],['veces','Por veces']].map(([v,l])=>chip(l,false,`data-a="gbase" data-v="${v}"`)).join('')}</div>`,'Elige cómo se convierten tus tareas en puntos.'):'')+
+  ((g.log||[]).length?blk(`Avances · ${g.log.length}`,`<div class="fin-movs">${g.log.slice(-8).reverse().map(l=>`<div style="grid-template-columns:1fr auto"><span class="small">${fmtD(l.fecha)} · ${nfmt(l.cant)} ${U_LBL[l.u]||esc(l.u||'')}</span><b class="num" style="color:var(--ok)">+${nfmt(l.pts??l.cant)}</b></div>`).join('')}</div>`):'')+
   blk('Fecha límite',`<input type="date" data-gbind="limite" value="${g.limite}" aria-label="Fecha límite">`)+
   blk(`Tareas vinculadas · ${linked.length}`,(linked.length?`<div class="tlist">${linked.map(t=>taskRow(t)).join('')}</div>`:'<span class="faint small">Ninguna todavía.</span>')+`<button class="btn sm" data-a="gTask" data-id="${g.id}">+ Nueva tarea para este objetivo</button>`)+
   (cand.length?moreBox('link','Vincular tareas existentes',cand.map(t=>`<button class="switch plain" data-a="glink" data-id="${g.id}" data-v="${t.id}"><span class="small">${esc(t.titulo)}</span><span class="s"></span></button>`).join('')):'')+
@@ -1718,7 +1880,7 @@ document.addEventListener('click',e=>{
     case'noop':break;
     case'createTask':{const d=SH.d;if(!d.titulo.trim())return;const nt=createTask(d);closeSheet();renderAll();toast('Tarea creada',`${nt.titulo} · ${relDay(nt.fecha)}${nt.hora?' '+nt.hora:''}${gcNote(nt)}`,nt.gcalWanted?'warn':'ok');break}
     case'createProject':{const d=SH.d;if(!d.nombre.trim())return;const ar=areaById(d.areaId);const ini=d.inicio||tISO();const p={id:uid('p'),nombre:d.nombre.trim(),areaId:d.areaId,color:ar.color,inicio:ini,fin:iso(addDays(parseISO(ini),+d.dur)),milestones:[]};S.projects.push(p);save();U.view='plan';U.planMode='projects';saveU();render();openSheet('project',p.id);toast('Proyecto creado','Agrega su primera tarea','ok');break}
-    case'createGoal':{const d=SH.d;if(!d.titulo.trim())return;const g={id:uid('g'),areaId:d.areaId,titulo:d.titulo.trim(),metrica:'Avance',meta:+d.meta||100,actual:+d.actual||0,unidad:d.unidad,limite:iso(addDays(today(),+d.plazo)),tasks:[]};S.goals.push(g);save();closeSheet();U.view='plan';U.planMode='goals';saveU();render();toast('Objetivo creado',g.titulo,'ok');break}
+    case'createGoal':{const d=SH.d;if(!d.titulo.trim())return;const g={id:uid('g'),areaId:d.areaId,titulo:d.titulo.trim(),metrica:'Avance',meta:+d.meta||100,actual:+d.actual||0,unidad:d.unidad,limite:iso(addDays(today(),+d.plazo)),tasks:[],modo:d.unidad==='pts'?'puntos':'directo',regla:d.unidad==='pts'?{cada:+d.rCada||30,base:d.rBase||'min',pts:+d.rPts||10}:null,log:[],updatedAt:new Date().toISOString()};S.goals.push(g);save();closeSheet();U.view='plan';U.planMode='goals';saveU();render();toast('Objetivo creado',g.titulo,'ok');break}
     case'newArea':openSheet('area',null,{nombre:'',color:AREA_COLORS[S.areas.length%AREA_COLORS.length],back:SH?{...SH}:null});break;
     case'createArea':{const d=SH.d;const ar={id:uid('a'),nombre:d.nombre.trim(),color:d.color};S.areas.push(ar);save();if(d.back){SH=d.back;if(SH.kind==='new')SH.d.areaId=ar.id;renderSheet()}else closeSheet();render();toast('Área creada',ar.nombre,'ok');break}
     case'tset':{if(!t)break;const k=el.dataset.k;
