@@ -403,6 +403,7 @@ details.more>div{padding:0 14px 14px}
 .rw-add i{color:var(--ink3)}
 .rw-confirm{display:grid;grid-template-columns:1fr auto;gap:6px 12px;background:rgba(255,255,255,.5);border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:14px;font-weight:800}
 .rw-confirm b{text-align:right;font:900 18px/1.2 var(--f-d)}
+body:has(.av-head) .toasts{opacity:0;pointer-events:none}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -1160,6 +1161,7 @@ function vGoalsList(){
     <div class="bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%;background:var(--forest)"></i></div>
     <div class="row between small wrap"><span class="muted">Llevas <b class="num" style="color:var(--ink)">${+(+g.actual).toFixed(2)}</b> de ${g.meta} ${esc(g.unidad)}</span><span class="faint">${dl>=0?`Faltan ${dl} días`:`Venció hace ${-dl} días`}</span></div>
     ${l.length?`<div class="small muted">${l.filter(isDone).length} de ${l.length} tareas hechas${ns?` · Siguiente: <button class="link" data-a="task" data-id="${ns.id}">${esc(ns.titulo)}</button>`:''}</div>`:''}
+    <button class="btn pri block" data-a="avOpen" data-id="${g.id}" style="margin-top:2px">${U_ICO[compUnit(g)]||'🎯'} Registrar avance</button>
     <div class="stepper"><button data-a="gstep" data-id="${g.id}" data-v="${-step}" aria-label="Restar ${step}">−${step}</button><button data-a="gstep" data-id="${g.id}" data-v="${step}" aria-label="Sumar ${step}">+${step}</button><button data-a="goal" data-id="${g.id}">Editar</button></div></article>`}).join('')+'</div>';
 }
 function vProjects(){
@@ -1453,7 +1455,7 @@ function compBlk(d){const g=S.goals.find(x=>x.id===d.goalId);if(!g)return'';cons
    'Lo que te comprometes a hacer. Al completar la tarea podrás ajustar lo que realmente hiciste.')}
 function compTaskBlk(t,gl){const g=gl[0],u=compUnit(g),c=t.comp&&t.comp.cant;
   return blk(`Compromiso · ${esc(g.titulo)}`,`<div class="regla"><input type="number" inputmode="decimal" data-cbind="${t.id}" value="${c?esc(c):''}" placeholder="Ej. ${u==='min'?30:u==='pag'?20:u==='km'?5:1}" aria-label="Compromiso"> <b>${U_LBL[u]||esc(u)}</b>${isPts(g)&&c?` <span class="muted">= ${nfmt(ptsFor(g,c))} puntos</span>`:''}</div>`)}
-function shAvance(){const t=S.tasks.find(x=>x.id===SH.arg),gl=S.goals.filter(g=>(g.tasks||[]).includes(SH.arg));if(!t||!gl.length)return'';
+function shAvance(){const direct=String(SH.arg).startsWith('g:'),t=direct?{comp:null}:S.tasks.find(x=>x.id===SH.arg),gl=direct?S.goals.filter(g=>g.id===SH.arg.slice(2)):S.goals.filter(g=>(g.tasks||[]).includes(SH.arg));if(!t||!gl.length)return'';
   const d=SH.d,g=gl.find(x=>x.id===d.g)||gl[0];d.g=g.id;const u=compUnit(g),pts=isPts(g);
   if(d.v==null)d.v=t.comp&&t.comp.cant?+t.comp.cant:'';
   const comp=t.comp&&t.comp.cant?+t.comp.cant:null;
@@ -1471,15 +1473,16 @@ function avPrev(g,v){const add=isPts(g)?ptsFor(g,v):(+v||0),a0=+g.actual||0,a1=a
   <div class="av-bar"><i style="width:${p0*100}%"></i><i class="add" style="width:${Math.max(0,p1-p0)*100}%"></i></div>
   <div class="row between small"><span class="muted">${nfmt(a0)} → <b style="color:var(--ink)">${nfmt(a1)}</b> de ${nfmt(m)} ${esc(un)}</span><b class="num" style="color:var(--forest)">${Math.round(p1*100)}%</b></div>
   ${a0<m&&a1>=m?'<div class="av-win">🏆 ¡Con esto logras tu objetivo!</div>':''}`}
-function avRefresh(){const t=S.tasks.find(x=>x.id===SH.arg),g=S.goals.find(x=>x.id===SH.d.g);if(!t||!g)return;const p=$('#avPrev');if(p)p.innerHTML=avPrev(g,SH.d.v);const c=$('#avCmp');if(c&&t.comp)c.innerHTML=avCmp(SH.d.v,+t.comp.cant)}
+function avRefresh(){const t=String(SH.arg).startsWith('g:')?{comp:null}:S.tasks.find(x=>x.id===SH.arg),g=S.goals.find(x=>x.id===SH.d.g);if(!t||!g)return;const p=$('#avPrev');if(p)p.innerHTML=avPrev(g,SH.d.v);const c=$('#avCmp');if(c&&t.comp)c.innerHTML=avCmp(SH.d.v,+t.comp.cant)}
 function addAvance(g,cant,taskId){const v=+cant||0;if(v<=0)return null;const add=isPts(g)?ptsFor(g,v):v,was=(+g.actual||0)>=(+g.meta||0);
   g.actual=+((+g.actual||0)+add).toFixed(2);g.log=g.log||[];g.log.push({id:uid('v'),fecha:tISO(),ts:new Date().toISOString(),cant:v,u:compUnit(g),pts:isPts(g)?add:null,taskId:taskId||null});g.updatedAt=new Date().toISOString();
   return{add,reached:!was&&g.actual>=g.meta}}
 document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a,v=el.dataset.v;if(!/^av|^gbase$/.test(a))return;
+  if(a==='avOpen'){const g=S.goals.find(x=>x.id===el.dataset.id);if(g)openSheet('avance','g:'+g.id,{g:g.id});return}
   if(a==='gbase'){const g=S.goals.find(x=>x.id===SH.arg);if(!g)return;g.modo='puntos';g.unidad='pts';g.regla=Object.assign({cada:30,pts:10},g.regla||{},{base:v});g.updatedAt=new Date().toISOString();save();renderSheet();renderView();return}
   if(a==='avGoal'){SH.d.g=v;SH.d.v=null;renderSheet();return}
   if(a==='avStep'){SH.d.v=Math.max(0,+((+SH.d.v||0)+ +v).toFixed(2));const i=$('#avIn');if(i)i.value=SH.d.v;avRefresh();return}
-  if(a==='avSave'){const g=S.goals.find(x=>x.id===SH.d.g);if(!g)return;const r=addAvance(g,SH.d.v,SH.arg);if(!r){toast('Escribe cuánto hiciste','','warn');return}
+  if(a==='avSave'){const g=S.goals.find(x=>x.id===SH.d.g);if(!g)return;const r=addAvance(g,SH.d.v,String(SH.arg).startsWith('g:')?null:SH.arg);if(!r){toast('Escribe cuánto hiciste','','warn');return}
     save();closeSheet();renderAll();
     if(r.reached&&typeof celebrate==='function')celebrate('<span style="font-size:72px;line-height:1">🏆</span>','¡Objetivo logrado!',`${g.titulo} · +100 XP`);
     else toast(`+${nfmt(r.add)} ${isPts(g)?'puntos':(U_LBL[g.unidad]||g.unidad)} · +10 XP`,g.titulo,'ok');return}
