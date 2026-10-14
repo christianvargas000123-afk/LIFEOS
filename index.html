@@ -404,6 +404,11 @@ details.more>div{padding:0 14px 14px}
 .rw-confirm{display:grid;grid-template-columns:1fr auto;gap:6px 12px;background:rgba(255,255,255,.5);border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:14px;font-weight:800}
 .rw-confirm b{text-align:right;font:900 18px/1.2 var(--f-d)}
 body:has(.av-head) .toasts{opacity:0;pointer-events:none}
+.task.hito{border:1.5px solid rgba(180,142,88,.85);background:linear-gradient(135deg,#FBF4E4,#FBF8F2 60%);box-shadow:0 6px 16px rgba(180,142,88,.18)}
+.task.hito .tt{font-weight:900}
+.pill.hito{background:rgba(180,142,88,.22);color:#6B4E14}
+.pill.sk{background:rgba(42,60,92,.10);color:var(--navy)}
+.reprog{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:14px;background:rgba(154,58,58,.07);border:1px solid rgba(154,58,58,.18);font-size:13.5px;font-weight:700}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -588,7 +593,7 @@ function deleteEv(r) {
 <script>window.addEventListener("error",function(e){try{var d=document.getElementById("bootErr");if(!d){d=document.createElement("div");d.id="bootErr";document.body.insertBefore(d,document.body.firstChild)}d.style.cssText="position:fixed;left:8px;right:8px;top:8px;z-index:999;background:#9A3A3A;color:#fff;font:600 13px/1.4 system-ui;padding:10px 12px;border-radius:10px";d.textContent="Error de LifeOS: "+(e.message||"desconocido")+(e.lineno?" (linea "+e.lineno+")":"")}catch(_){}});</script>
 <script>
 (function(){
-const APP_V='14.10.2026 08:50',EXEC_URL='https://script.google.com/macros/s/AKfycbzKpryUDVrqMYYdBzhuE5l0k5P2FlH2Ahn06lxY4H1xPD8o90Y9OpVrg08MAp05E7nLCw/exec';
+const APP_V='14.10.2026 10:14',EXEC_URL='https://script.google.com/macros/s/AKfycbzKpryUDVrqMYYdBzhuE5l0k5P2FlH2Ahn06lxY4H1xPD8o90Y9OpVrg08MAp05E7nLCw/exec';
 
 /* ══════════════ LifeOS · edición simplificada ══════════════ */
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
@@ -610,7 +615,7 @@ const MES_L=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','
 const DIA=['lun','mar','mié','jue','vie','sáb','dom'];
 const DIA_L=['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
 const wd=d=>(d.getDay()+6)%7;
-const fmtD=s=>{if(!s)return'Sin fecha';const d=parseISO(s);return`${d.getDate()} ${MES[d.getMonth()]}`};
+const fmtD=s=>{if(!s)return'Sin fecha';const d=parseISO(s);return`${d.getDate()} ${MES[d.getMonth()]}${d.getFullYear()!==new Date().getFullYear()?' '+d.getFullYear():''}`};
 const fmtH=h=>{h=+h||0;if(!h)return'0 min';const m=Math.round(h*60);if(m<60)return m+' min';const hh=Math.floor(m/60),mm=m%60;return mm?`${hh} h ${mm}`:`${hh} h`};
 const relDay=s=>{if(!s)return'Sin fecha';const n=diffDays(today(),parseISO(s));if(n===0)return'Hoy';if(n===1)return'Mañana';if(n===-1)return'Ayer';if(n>1&&n<7)return DIA_L[wd(parseISO(s))];return fmtD(s)};
 const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -1000,7 +1005,7 @@ function taskRow(t,opt={}){
   const a=areaById(t.areaId),p=projById(t.proyectoId),done=isDone(t),over=isOverdue(t);
   const subs=t.subs||[];const sd=subs.filter(s=>s.done).length;
   const showDate=opt.date!==false||over;
-  return`<div class="task ${done?'done':''}">
+  return`<div class="task ${done?'done':''} ${t.hito?'hito':''}">
     <button class="chk ${done?'on':''}" data-a="done" data-id="${t.id}" aria-label="${done?'Reabrir':'Completar'}: ${esc(t.titulo)}">${ic('check',18,3)}</button>
     <button class="tbody" data-a="task" data-id="${t.id}" aria-label="Detalles de ${esc(t.titulo)}">
       <div class="tt">${esc(t.titulo)}</div>
@@ -1009,6 +1014,7 @@ function taskRow(t,opt={}){
         ${t.hora?`· <b class="num" style="color:var(--ink)">${t.hora}</b>`:''}
         ${t.est?`· <span class="num">${fmtH(t.est)}</span>`:''}
         ${p?`· ${esc(p.nombre)}`:''}${t.rec?` · ↻ ${REC[t.rec].toLowerCase()}`:''}${subs.length?` · ${sd}/${subs.length} pasos`:''}
+        ${t.hito?'<span class="pill hito">🏁 Hito</span>':''}${t.ext&&t.tags&&t.tags[0]&&!t.hito?`<span class="pill sk">${esc(t.tags[0])}</span>`:''}
         ${t.gcalId||t.gcalParent?`<span class="pill g">${ic('bell',12,2.4)} Aviso</span>`:''}${t.gcalBusy?'<span class="pill g">Agendando…</span>':''}${t.gcalWanted&&!t.gcalId?'<span class="pill warn">Aviso pendiente</span>':''}
       </div>
     </button>
@@ -1047,10 +1053,12 @@ function vToday(){
     <div class="acts"><button class="btn light" style="flex:1" data-a="done" data-id="${next.id}">${ic('check',18,3)} Completar</button><button class="btn ghost" data-a="task" data-id="${next.id}">Detalles</button></div></section>`}
   h+=gcBanner();
   const rest=t=>!next||t.id!==next.id;
-  if(over.filter(rest).length)h+=sec('Vencidas',over.filter(rest).length,'bad')+`<div class="tlist">${over.filter(rest).map(t=>taskRow(t)).join('')}</div>`;
+  const byDur=(a,b)=>((+a.est||9)-(+b.est||9))||byTime(a,b);
+  const pl=planLateCount();
+  if(over.filter(rest).length)h+=sec('Vencidas',over.filter(rest).length,'bad')+(pl?`<div class="reprog"><span>${pl} del plan de carrera ${pl===1?'quedó':'quedaron'} atrás</span><button class="btn sm" data-a="planReprog">Reprogramar atrasadas</button></div>`:'')+`<div class="tlist">${over.filter(rest).sort(byDur).map(t=>taskRow(t)).join('')}</div>`;
   if(evs.length)h+=sec('Agenda de Google',evs.length)+`<div class="tlist">${evs.map(evRow).join('')}</div>`;
   const tp=todayPend.filter(rest);
-  if(tp.length)h+=sec('Hoy',tp.length)+`<div class="tlist">${tp.map(t=>taskRow(t,{date:false})).join('')}</div>`;
+  if(tp.length)h+=sec('Hoy',tp.length)+`<div class="tlist">${tp.sort(byDur).map(t=>taskRow(t,{date:false})).join('')}</div>`;
   if(!next&&!evs.length)h+=`<div class="card">${empty('Nada pendiente para hoy','Escribe arriba lo que quieras hacer o toca “Crear”.')}</div>`;
   const up=pending().filter(t=>t.fecha&&t.fecha>tI&&t.fecha<=iso(addDays(T,2))).length;
   h+=`<div class="stack">${up?`<button class="linkrow" data-a="goTasks" data-v="pending"><span>${up} para mañana y pasado</span>${ic('right',18,2.4)}</button>`:''}
@@ -1142,7 +1150,7 @@ function goalProgress(g){const l=S.tasks.filter(t=>(g.tasks||[]).includes(t.id)&
 function projProgress(p){const l=S.tasks.filter(t=>t.proyectoId===p.id&&!t.archived);return{l,p:l.length?l.filter(isDone).length/l.length:0}}
 const nextStep=list=>list.filter(t=>!isDone(t)).sort((a,b)=>(a.fecha||'9999')>(b.fecha||'9999')?1:-1)[0];
 function vPlan(){
-  let h=`<div class="seg" role="group" aria-label="Sección">${[['goals','Objetivos'],['projects','Proyectos'],['rewards','Premios'],['progress','Progreso']].map(([k,l])=>`<button class="${U.planMode===k?'on':''}" data-a="pmode" data-v="${k}" aria-pressed="${U.planMode===k}">${l}</button>`).join('')}</div>`;
+  let h=loadCard()+`<div class="seg" role="group" aria-label="Sección">${[['goals','Objetivos'],['projects','Proyectos'],['rewards','Premios'],['progress','Progreso']].map(([k,l])=>`<button class="${U.planMode===k?'on':''}" data-a="pmode" data-v="${k}" aria-pressed="${U.planMode===k}">${l}</button>`).join('')}</div>`;
   if(U.planMode==='goals')return h+vGoals();
   if(U.planMode==='projects')return h+vProjects();
   if(U.planMode==='rewards')return h+vRewards();
@@ -1547,6 +1555,103 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!
     rdm().push({id:uid('c'),rewardId:r.id,nombre:r.nombre,emoji:r.emoji,costo:r.costo,ts:now,updatedAt:now});save();closeSheet();renderView();
     if(typeof celebrate==='function')celebrate(`<span style="font-size:76px;line-height:1">${r.emoji}</span>`,'¡A disfrutar!',`${r.nombre}. Te lo ganaste. Te quedan ${W.bal-r.costo} monedas.`);return}
 });
+/* ══════════════ plan de carrera: importación por ventana móvil ══════════════
+   El archivo completo (863 tareas) no cabe en el almacenamiento privado de Google (450 KB),
+   así que se guarda solo en este dispositivo y LifeOS agrega a tu lista las próximas 4 semanas
+   (y todos los hitos). Cada día que abres la app suma las semanas que van entrando. */
+const PLAN_KEY='lifeos.plan',PLAN_NAME='Plan de carrera: BI y contador remoto',PLAN_PID='p_plan_carrera',PLAN_START='2026-10-19',PLAN_DAYS=28;
+const PW={1:[1050,1320,150],2:[1050,1320,150],4:[1050,1320,150],5:[1050,1320,150],6:[540,720,120],0:[540,720,120]}; /* getDay(): sin miércoles (3) · entre semana 17:30–22:00 · fin de semana 9:00–12:00 · minutos máx. por día */
+const hm2m=s=>{const[h,m]=String(s||'0:0').split(':').map(Number);return h*60+(m||0)};
+const m2hm=m=>`${pad(Math.floor(m/60))}:${pad(m%60)}`;
+const durOf=t=>Math.round(Math.max(.25,+t.est||.5)*60);
+function planRaw(){try{const s=localStorage.getItem(PLAN_KEY);return s?JSON.parse(s):null}catch(e){return null}}
+function planOK(L){return Array.isArray(L)&&L.length&&L.every(x=>x&&x.id&&x.date&&x.title&&+x.minutes>0)}
+/* Si el archivo no trae horario, lo acomoda igual que el plan corregido: desde el 19 de octubre, sin miércoles, tardes y mañanas de fin de semana. */
+function planSchedule(L){if(L.every(x=>x.time))return L;
+  const by={};L.forEach((x,i)=>{(by[x.week]=by[x.week]||[]).push(i)});const out=L.map(x=>Object.assign({},x));
+  const DAYS=[0,1,3,4,5,6],CAP={0:150,1:150,3:150,4:150,5:120,6:120},ST={0:1050,1:1050,3:1050,4:1050,5:540,6:540},EN={0:1320,1:1320,3:1320,4:1320,5:720,6:720};
+  Object.keys(by).forEach(w=>{const ws=addDays(parseISO(PLAN_START),7*(+w-1)),load={},slots={};DAYS.forEach(d=>{load[d]=0;slots[d]=[]});
+    by[w].slice().sort((a,b)=>(!L[a].milestone)-(!L[b].milestone)||a-b).forEach(i=>{const x=L[i],od=(parseISO(x.date).getDay()+6)%7,pref=od===2?3:od,m=+x.minutes;
+      const fits=d=>load[d]+m<=CAP[d]&&ST[d]+load[d]+15*slots[d].length+m<=EN[d];
+      let cand=[...DAYS.filter(d=>d>=pref),...DAYS.filter(d=>d<pref).reverse()];if(x.skill==='Revisión')cand=[6,5,...cand];
+      const d=cand.find(fits)??[0,1,3,4].sort((a,b)=>load[a]-load[b])[0];load[d]+=m;slots[d].push(i)});
+    DAYS.forEach(d=>{let t=ST[d];slots[d].sort((a,b)=>a-b).forEach(i=>{out[i].date=iso(addDays(ws,d));out[i].time=m2hm(t);t+=+L[i].minutes+15})})});
+  return out}
+/* Busca la hora libre más próxima: si ya tienes algo a esa hora, la tarea del plan se recorre (sin salir de tu horario permitido). */
+function freeSlot(date,start,mins,selfId){
+  for(let k=0;k<10;k++){const d=addDays(parseISO(date),k),w=PW[d.getDay()];if(!w)continue;const di=iso(d);
+    const busy=S.tasks.filter(t=>t.id!==selfId&&!t.archived&&!isDone(t)&&t.fecha===di&&t.hora).map(t=>[hm2m(t.hora),hm2m(t.hora)+durOf(t)]).sort((a,b)=>a[0]-b[0]);
+    let s=k===0?Math.max(start,w[0]):w[0];
+    for(let g=0;g<40;g++){const hit=busy.find(([a,b])=>s<b+10&&a<s+mins+10);if(!hit)break;s=hit[1]+15}
+    if(s+mins<=w[1])return{date:di,hora:m2hm(s)}}
+  return{date,hora:m2hm(start)}}
+function planProject(L){let p=projById(PLAN_PID);const area=(S.areas.find(a=>a.id==='a_esc')||S.areas[0]);
+  const dates=L.map(x=>x.date).sort(),ms=L.filter(x=>x.milestone).map(x=>({id:'m_'+x.id,nombre:x.title,fecha:x.date}));
+  if(!p){p={id:PLAN_PID,nombre:PLAN_NAME,areaId:area.id,color:'#2A3C5C',inicio:dates[0],fin:dates[dates.length-1],milestones:ms,updatedAt:new Date().toISOString()};S.projects.push(p)}
+  else{p.inicio=dates[0];p.fin=dates[dates.length-1];const own=(p.milestones||[]).filter(m=>!String(m.id).startsWith('m_cp-'));p.milestones=[...own,...ms];p.updatedAt=new Date().toISOString()}
+  return p}
+const planNotes=x=>`${x.note||''}\n\nEntregable: ${x.deliverable||'—'}\nSemana ${x.week} de 156 · ${x.skill}${x.milestone?' · HITO':''}`;
+const inWeek=d=>{const s=iso(startOfWeek(today()));return d>=s&&d<=iso(addDays(startOfWeek(today()),6))};
+function planSeen(){S.plan=S.plan||{};return new Set(String(S.plan.seen||'').split(',').filter(Boolean))}
+function planMaterialize(L,update){
+  L=planSchedule(L);const p=planProject(L),seen=planSeen(),T=tISO(),hz=iso(addDays(today(),PLAN_DAYS)),area=p.areaId,now=new Date().toISOString();
+  const byExt={};S.tasks.forEach(t=>{if(t.ext)byExt[t.ext]=t});let add=0,upd=0;
+  L.slice().sort((a,b)=>(a.date+a.time)>(b.date+b.time)?1:-1).forEach(x=>{
+    const t=byExt[x.id];
+    if(t){if(!update||isDone(t))return;
+      const moved=t.pp!==`${x.date} ${x.time}`&&t.pa===`${t.fecha} ${t.hora}`; /* cambió en el plan y tú no la habías movido */
+      Object.assign(t,{titulo:x.title,notas:planNotes(x),est:+x.minutes/60,tags:[x.skill],hito:!!x.milestone,prioridad:x.milestone?'P1':t.prioridad});
+      if(moved){const f=freeSlot(x.date,hm2m(x.time),+x.minutes,t.id);t.fecha=f.date;t.inicio=f.date;t.hora=f.hora;t.pa=`${f.date} ${f.hora}`;if(t.gcalId&&!t.gcalSeries)gcUpdate(t)}
+      t.pp=`${x.date} ${x.time}`;t.updatedAt=now;upd++;return}
+    if(seen.has(x.id)||(S.deleted&&S.deleted['cp_'+x.id]))return; /* ya se agregó antes y la borraste: no la vuelve a meter */
+    if(!x.milestone&&x.date>hz)return;
+    const f=freeSlot(x.date,hm2m(x.time),+x.minutes,null);
+    const nt=mkTask({id:'cp_'+x.id,titulo:x.title,notas:planNotes(x),areaId:area,proyectoId:p.id,prioridad:x.milestone?'P1':'P3',est:+x.minutes/60,fecha:f.date,inicio:f.date,hora:f.hora,tags:[x.skill]});
+    nt.ext=x.id;nt.hito=!!x.milestone;nt.pp=`${x.date} ${x.time}`;nt.pa=`${f.date} ${f.hora}`;
+    if(S.settings.gcal&&(nt.hito||inWeek(nt.fecha))&&nt.fecha>=T)nt.gcalWanted=true;
+    S.tasks.push(nt);seen.add(x.id);add++});
+  S.plan.seen=[...seen].join(',');S.plan.total=L.length;S.plan.last=T;S.plan.pid=p.id;
+  return{add,upd,total:L.length}}
+/* Cada día: agrega las semanas que entran, pide aviso para la semana en curso y aligera tareas del plan ya terminadas hace más de un mes. */
+function planRoll(force){const L=planRaw();
+  if(S.plan&&S.plan.pid){const T=tISO(),old=iso(addDays(today(),-30));
+    S.tasks.forEach(t=>{if(!t.ext)return;
+      if(!isDone(t)&&!t.gcalId&&!t.gcalWanted&&!t.gcalParent&&S.settings.gcal&&t.fecha>=T&&(t.hito||inWeek(t.fecha)))t.gcalWanted=true;
+      if(isDone(t)&&t.completedAt&&t.completedAt.slice(0,10)<old&&t.notas)t.notas=''})}
+  if(!L||!planOK(L)){if(force)toast('Falta el archivo del plan','Cárgalo en Ajustes → Plan de carrera','warn');return null}
+  if(!force&&S.plan&&S.plan.last===tISO())return null;
+  const r=planMaterialize(L,false);save();renderAll();if(typeof gcFlush==='function')gcFlush();
+  if(r.add)toast(`Plan: ${r.add} ${r.add===1?'tarea nueva':'tareas nuevas'}`,'Se agregaron las semanas que vienen','ok');else if(force)toast('Plan al día','No había semanas nuevas por agregar','ok');
+  return r}
+function planLoadFile(file){const rd=new FileReader();rd.onload=()=>{let L;try{L=JSON.parse(rd.result);if(L&&!Array.isArray(L))L=L.tasks;if(!planOK(L))throw 0}catch(e){toast('No se pudo leer el plan','El archivo debe ser tareas_plan_carrera.json','warn');return}
+    try{localStorage.setItem(PLAN_KEY,JSON.stringify(L))}catch(e){toast('No se pudo guardar el archivo en este dispositivo','Igual se agregan las próximas 4 semanas','warn')}
+    const r=planMaterialize(L,true);save();closeSheet();U.view='plan';U.planMode='projects';saveU();render();if(typeof gcFlush==='function')gcFlush();
+    toast('Plan de carrera cargado',`${r.add} nuevas · ${r.upd} actualizadas · ${r.total} en el plan`,'ok')};rd.readAsText(file)}
+/* Reprogramar atrasadas: lo no hecho del plan pasa a la semana siguiente, respetando tus días y horarios. Los hitos no se mueven. */
+function planReprogram(){const T=today(),base=addDays(startOfWeek(T),7);
+  const late=S.tasks.filter(t=>t.ext&&!t.hito&&!isDone(t)&&!t.archived&&t.fecha&&t.fecha<iso(T)).sort((a,b)=>(a.fecha+(a.hora||''))>(b.fecha+(b.hora||''))?1:-1);
+  if(!late.length){toast('No hay atrasadas del plan','Vas al día','ok');return}
+  const loadOn=d=>sum(S.tasks.filter(t=>t.ext&&!isDone(t)&&t.fecha===d),t=>durOf(t));
+  late.forEach(t=>{const wd=(parseISO(t.fecha).getDay()+6)%7,m=durOf(t);let placed=null;
+    for(let k=0;k<21&&!placed;k++){const d=addDays(base,wd+k),w=PW[d.getDay()];if(!w)continue;const di=iso(d);if(loadOn(di)+m>w[2])continue;
+      const f=freeSlot(di,w[0],m,t.id);if(f.date===di)placed=f}
+    placed=placed||freeSlot(iso(base),PW[1][0],m,t.id);
+    t.fecha=placed.date;t.inicio=placed.date;t.hora=placed.hora;t.pa=`${placed.date} ${placed.hora}`;t.postponed=(t.postponed||0)+1;t.updatedAt=new Date().toISOString();
+    if(t.gcalId&&!t.gcalSeries)gcUpdate(t);else if(S.settings.gcal&&inWeek(t.fecha)&&!t.gcalId)t.gcalWanted=true});
+  save();renderAll();if(typeof gcFlush==='function')gcFlush();toast(`${late.length} ${late.length===1?'tarea movida':'tareas movidas'} a la próxima semana`,'Los hitos se quedan en su fecha','ok')}
+function planLateCount(){return S.tasks.filter(t=>t.ext&&!t.hito&&!isDone(t)&&!t.archived&&t.fecha&&t.fecha<tISO()).length}
+/* Carga de trabajo: semana y mes con horas totales */
+function loadCard(){const T=today(),ws=iso(startOfWeek(T)),we=iso(addDays(startOfWeek(T),6)),ms=iso(new Date(T.getFullYear(),T.getMonth(),1)),me=iso(new Date(T.getFullYear(),T.getMonth()+1,0));
+  const calc=(a,b)=>{const l=live().filter(t=>t.fecha&&t.fecha>=a&&t.fecha<=b);return{n:l.length,h:sum(l,t=>+t.est||0),hd:sum(l.filter(isDone),t=>+t.est||0),nd:l.filter(isDone).length}};
+  const W=calc(ws,we),M=calc(ms,me);if(!W.n&&!M.n)return'';const H=x=>fmtH(x)||'0 h';
+  const tile=(l,x)=>`<div class="card kpi" style="padding:12px 14px"><span class="l">${l}</span><span class="v num" style="font-size:24px">${H(x.h)}</span><span class="d">${x.n} ${x.n===1?'tarea':'tareas'} · ${H(x.hd)} hechas</span><div class="bar" style="height:6px;margin-top:4px"><i style="width:${x.h?Math.min(100,x.hd/x.h*100):0}%;background:var(--forest)"></i></div></div>`;
+  return`<div class="grid2" style="margin-bottom:12px">${tile('Esta semana',W)}${tile(MES_L[T.getMonth()].replace(/^./,c=>c.toUpperCase()),M)}</div>`}
+document.addEventListener('change',e=>{if(e.target.id==='planFile'&&e.target.files&&e.target.files[0])planLoadFile(e.target.files[0])});
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a;
+  if(a==='planRoll'){planRoll(true);return}
+  if(a==='planReprog'){planReprogram();return}});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(()=>planRoll(false),2500)});
+setTimeout(()=>planRoll(false),4000);
 function vProgress(){
   const T=today(),tI=iso(T),ws=iso(startOfWeek(T));
   const due=live().filter(t=>t.fecha&&t.fecha>=ws&&t.fecha<=tI);
@@ -1745,6 +1850,7 @@ function shProject(){
   const canGantt=true;
   return shHead(`${esc(areaById(p.areaId).nombre)} · ${fmtD(p.inicio)} → ${fmtD(p.fin)}`,esc(p.nombre))+
   `<div class="bar" style="margin-bottom:6px" role="progressbar" aria-valuenow="${Math.round(pr*100)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pr*100}%;background:${p.color}"></i></div><div class="small muted" style="margin-bottom:16px">${Math.round(pr*100)}% · ${l.filter(isDone).length} de ${l.length} tareas hechas</div>`+
+  (p.id===PLAN_PID?`<div class="card stack blk" style="gap:10px"><span class="eyebrow">Plan de carrera</span><span class="small muted">${S.plan&&S.plan.total?`${l.length} de ${S.plan.total} tareas ya están en tu lista. Las siguientes semanas se agregan solas.`:''}</span><div class="grid2"><button class="btn sm" data-a="planRoll">Agregar semanas</button><button class="btn sm" data-a="planReprog">Reprogramar atrasadas${planLateCount()?` (${planLateCount()})`:''}</button></div></div>`:'')+
   (ns?`<div class="card stack blk" style="gap:8px"><span class="eyebrow">Siguiente paso</span>${taskRow(ns)}</div>`:'')+
   blk(`Tareas abiertas · ${open.length}`,(open.length>1?`<div class="tlist">${open.slice(1).map(t=>taskRow(t)).join('')}</div>`:open.length?'':'<span class="faint small">No hay tareas abiertas.</span>')+`<button class="btn pri block" data-a="pTask" data-id="${p.id}">+ Agregar tarea al proyecto</button>`)+
   blk('Hitos',(p.milestones||[]).slice().sort((a,b)=>a.fecha>b.fecha?1:-1).map(m=>`<div class="row" style="gap:10px"><span style="color:var(--gold)" aria-hidden="true">◆</span><span class="small" style="flex:1">${esc(m.nombre)}</span><span class="tiny faint num">${fmtD(m.fecha)}</span><button class="chip" data-a="msDel" data-id="${p.id}" data-v="${m.id}" aria-label="Quitar hito ${esc(m.nombre)}">Quitar</button></div>`).join('')+
@@ -1798,6 +1904,7 @@ function shSettings(){
   blk('Sincronización',`<div class="note ${syncState==='cloud'?'blue':['error','unauthorized','big'].includes(syncState)?'red':''}">${esc(syncTxt)}</div>`)+
   blk('Áreas',`<div class="chips">${S.areas.map(a=>`<span class="chip" style="cursor:default"><span class="dot" style="background:${a.color}"></span>${esc(a.nombre)}</span>`).join('')}<button class="chip" data-a="newArea">+ Nueva área</button></div>`)+
   blk('App en tu iPhone',`<button class="btn block" data-a="install">${ic('phone',20,2)} Agregar a la pantalla de inicio</button>`)+
+  blk('Plan de carrera',`${S.plan&&S.plan.total?`<div class="note blue">Plan cargado: ${S.plan.total} tareas. En tu lista están las próximas 4 semanas y los hitos; las demás entran solas cada día.${planRaw()?'':'<br><b>En este dispositivo falta el archivo:</b> cárgalo para que sigan entrando semanas.'}</div>`:''}<label class="btn block" for="planFile" style="cursor:pointer">${S.plan&&S.plan.total?'Actualizar plan (JSON)':'Cargar plan (JSON)'}</label><input type="file" id="planFile" accept="application/json,.json" hidden>${S.plan&&S.plan.total?'<div class="grid2" style="margin-top:8px"><button class="btn sm" data-a="planRoll">Agregar semanas</button><button class="btn sm" data-a="planReprog">Reprogramar atrasadas</button></div>':''}`,'El archivo se queda solo en este dispositivo. Si lo vuelves a cargar, actualiza sin duplicar y respeta lo que ya marcaste como hecho.')+
   blk('Versión',`<div class="row between" style="gap:10px"><span class="small"><b>LifeOS ${APP_V}</b></span>${GAS?`<a class="btn sm navy" target="_top" href="${EXEC_URL}?v=${Date.now()}">Buscar actualización</a>`:''}</div>`,GAS?'Si no ves algo nuevo, toca “Buscar actualización”: descarga la versión más reciente.':'')+
   blk('Respaldo',`<button class="btn block" data-a="export">Exportar respaldo (JSON)</button><label class="btn block" for="importFile" style="cursor:pointer">Importar respaldo</label><input type="file" id="importFile" accept="application/json,.json" hidden><textarea id="importText" rows="3" placeholder="…o pega aquí el texto de un respaldo" style="width:100%;box-sizing:border-box;margin-top:8px;border-radius:12px;padding:10px;font:600 13px/1.3 inherit;border:1px solid rgba(0,0,0,.15);background:rgba(255,255,255,.6)"></textarea><button class="btn block" data-a="importPaste">Agregar lo pegado a mis datos</button>`,'Importar archivo reemplaza los datos de este dispositivo. Pegar texto solo agrega lo que falte, sin borrar nada.')+
   blk('Zona de borrado',`<button class="btn danger block ${SH.d.arm==='demo'?'armed':''}" data-a="demo">${SH.d.arm==='demo'?'Toca otra vez: reemplaza tus datos':'Cargar datos de ejemplo'}</button>
