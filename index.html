@@ -1490,6 +1490,7 @@ document.addEventListener('input',e=>{const el=e.target;
   if(el.dataset.rbind){const g=S.goals.find(x=>x.id===SH.arg);if(!g||!g.regla)return;g.regla[el.dataset.rbind]=+el.value||0;g.updatedAt=new Date().toISOString();clearTimeout(el._t);el._t=setTimeout(()=>{save();renderView()},400)}
 });
 /* ══════════════ recompensas: gana monedas con tus tareas y objetivos, canjéalas por gustos ══════════════ */
+const coin=(s=18)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true" style="vertical-align:-.18em;display:inline-block"><defs><radialGradient id="cgold" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#FFF0B8"/><stop offset=".5" stop-color="#E6B94E"/><stop offset="1" stop-color="#A9761E"/></radialGradient></defs><circle cx="12" cy="12" r="11" fill="url(#cgold)" stroke="#94641A" stroke-width="1"/><circle cx="12" cy="12" r="7.8" fill="none" stroke="#FFF3C4" stroke-opacity=".75" stroke-width="1.2"/><path d="M9.6 7.4v8.2h5" fill="none" stroke="#8A5A12" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const RW_DEF=[['r_anime','📺','Un capítulo de tu anime favorito',60],['r_net','🌐','30 min de vagar en internet',40],['r_siesta','😴','Siesta sin culpa',80],['r_game','🎮','2 horas de Minecraft o tu juego favorito',150],['r_food','🍕','Tu comida favorita',200],['r_peli','🎬','Maratón de películas',300]];
 const RW_EMOJI=['🎬','📺','🌐','🎮','🍕','😴','🛍️','☕','🍦','🎧','📚','🛁','🏖️','🍺','🎤','⚽'];
 const rws=()=>S.rewards||(S.rewards=RW_DEF.map(([id,e,n,c])=>({id,emoji:e,nombre:n,costo:c,updatedAt:'2026-01-01T00:00:00.000Z'})));
@@ -1497,25 +1498,25 @@ const rdm=()=>S.redemptions||(S.redemptions=[]);
 function wallet(){const g=game(),spent=sum(rdm(),r=>r.costo);return{earned:g.xp,spent,bal:g.xp-spent}}
 function vRewards(){const W=wallet(),list=rws().slice().sort((a,b)=>a.costo-b.costo),recent=rdm().slice().sort((a,b)=>a.ts<b.ts?1:-1).slice(0,5);
   let h=`<section class="rw-hero"><span class="eyebrow" style="color:#F1D9C9">Tus monedas</span>
-    <div class="rw-bal"><span class="coin">🪙</span><b class="num">${W.bal}</b></div>
+    <div class="rw-bal"><span class="coin">${coin(40)}</span><b class="num">${W.bal}</b></div>
     <div class="rw-sub"><span>Ganadas <b class="num">${W.earned}</b></span><span>Canjeadas <b class="num">${W.spent}</b></span></div>
     <div class="tiny" style="color:#EBD3C4">Ganas monedas al completar tareas (10–30), avanzar un objetivo (+10), cumplir tu meta del día (+20) y lograr un objetivo (+100).</div></section>
   <div class="sec">Canjear <span class="n">${list.length}</span></div>
   <div class="rw-grid">${list.map(r=>{const ok=W.bal>=r.costo,pct=Math.min(100,Math.round(Math.max(0,W.bal)/r.costo*100));
-    return`<article class="rw-card ${ok?'ok':''}"><button class="rw-edit" data-a="rwEdit" data-id="${r.id}" aria-label="Editar recompensa">⋯</button><i>${r.emoji}</i><b>${esc(r.nombre)}</b><span class="rw-cost">🪙 ${r.costo}</span>
+    return`<article class="rw-card ${ok?'ok':''}"><button class="rw-edit" data-a="rwEdit" data-id="${r.id}" aria-label="Editar recompensa">⋯</button><i>${r.emoji}</i><b>${esc(r.nombre)}</b><span class="rw-cost">${coin(16)} ${r.costo}</span>
       ${ok?`<button class="btn pri sm" data-a="rwAsk" data-id="${r.id}">Canjear</button>`:`<div class="rw-need"><div class="bar"><i style="width:${pct}%;background:var(--camel)"></i></div><span>Te faltan ${r.costo-Math.max(0,W.bal)}</span></div>`}</article>`}).join('')}
     <button class="rw-card rw-add" data-a="rwNew"><i>＋</i><b>Nueva recompensa</b><span class="tiny faint">Algo que disfrutes</span></button></div>`;
   if(recent.length)h+=`<div class="sec">Últimos canjes</div><div class="card stack" style="gap:0">${recent.map(r=>`<div class="row between small" style="padding:9px 0;border-top:1px solid var(--line)"><span>${r.emoji} ${esc(r.nombre)}</span><span class="muted num">${fmtD(r.ts.slice(0,10))} · −${r.costo}</span></div>`).join('')}</div>`;
   return h}
 function shCanje(){const r=rws().find(x=>x.id===SH.arg);if(!r)return'';const W=wallet();
   return`<div class="av-head"><span class="av-ico" style="font-size:64px">${r.emoji}</span><span class="eyebrow">Recompensa</span><h2 id="shT">${esc(r.nombre)}</h2></div>
-   <div class="rw-confirm"><span>Cuesta</span><b>🪙 ${r.costo}</b><span>Te quedan</span><b>🪙 ${W.bal-r.costo}</b></div>
+   <div class="rw-confirm"><span>Cuesta</span><b>${coin(16)} ${r.costo}</b><span>Te quedan</span><b>${coin(16)} ${W.bal-r.costo}</b></div>
    <button class="btn pri block" data-a="rwDo" data-id="${r.id}" ${W.bal>=r.costo?'':'disabled'}>¡Me la gané! Canjear</button><button class="btn ghost block" data-a="close" style="margin-top:6px">Todavía no</button>`}
 function shPremio(){const r=SH.arg?rws().find(x=>x.id===SH.arg):null,d=SH.d;
   return shHead(r?'Editar recompensa':'Nueva recompensa',r?esc(r.nombre):'¿Con qué te premias?')+
   blk('Nombre',`<input type="text" data-fbind="nombre" value="${esc(d.nombre||'')}" placeholder="Ej. Un café de especialidad" autocomplete="off">`)+
   blk('Ícono',`<div class="fin-emojis">${RW_EMOJI.map(e=>`<button class="${d.emoji===e?'on':''}" data-a="rwSet" data-k="emoji" data-v="${e}">${e}</button>`).join('')}</div>`)+
-  blk('¿Cuántas monedas cuesta?',`<div class="chips">${[30,60,100,150,200,300,500].map(n=>chip(`🪙 ${n}`,+d.costo===n,`data-a="rwSet" data-k="costo" data-v="${n}"`)).join('')}</div>`,'Entre más grande el gusto, más monedas. Una tarea normal da 10–15.')+
+  blk('¿Cuántas monedas cuesta?',`<div class="chips">${[30,60,100,150,200,300,500].map(n=>chip(`${coin(16)} ${n}`,+d.costo===n,`data-a="rwSet" data-k="costo" data-v="${n}"`)).join('')}</div>`,'Entre más grande el gusto, más monedas. Una tarea normal da 10–15.')+
   `<button class="btn pri block" data-a="rwSave">${r?'Guardar':'Crear recompensa'}</button>`+
   (r?`<button class="btn danger block ${d.arm?'armed':''}" data-a="rwDel" data-id="${r.id}" style="margin-top:8px">${d.arm?'Toca otra vez para eliminar':'Eliminar recompensa'}</button>`:'')}
 function rewardStats(){const all=rdm();const W=wallet();if(!all.length&&!W.earned)return'';
@@ -1525,9 +1526,9 @@ function rewardStats(){const all=rdm();const W=wallet();if(!all.length&&!W.earne
   const ganadas30=(()=>{const done=S.tasks.filter(t=>isDone(t)&&t.completedAt&&iso(new Date(t.completedAt))>=from30);return sum(done,taskXP)+sum(S.goals,g=>(g.log||[]).filter(l=>l.fecha>=from30).length*10)})();
   const gast30=sum(m30,r=>r.costo);
   return`<div class="card stack"><h3>Tus recompensas</h3>
-   <div class="grid2"><div><span class="eyebrow">Disponibles</span><div class="num" style="font:900 26px/1.1 var(--f-d)">🪙 ${W.bal}</div></div><div><span class="eyebrow">Canjes · 30 días</span><div class="num" style="font:900 26px/1.1 var(--f-d)">${m30.length}</div></div></div>
+   <div class="grid2"><div><span class="eyebrow">Disponibles</span><div class="num" style="font:900 26px/1.1 var(--f-d)">${coin(16)} ${W.bal}</div></div><div><span class="eyebrow">Canjes · 30 días</span><div class="num" style="font:900 26px/1.1 var(--f-d)">${m30.length}</div></div></div>
    ${fav?`<div class="small">Tu favorita: <b>${fav.e} ${esc(fav.nm)}</b> (${fav.n} ${fav.n===1?'vez':'veces'})</div>`:'<div class="small muted">Aún no canjeas nada. Ve a Plan → Premios cuando te ganes algo.</div>'}
-   ${rows.map(r=>`<div class="stack" style="gap:4px"><div class="row between small"><span>${r.e} ${esc(r.nm)}</span><b class="num">${r.n}× · 🪙 ${r.c}</b></div><div class="bar"><i style="width:${r.n/mx*100}%;background:var(--claret)"></i></div></div>`).join('')}
+   ${rows.map(r=>`<div class="stack" style="gap:4px"><div class="row between small"><span>${r.e} ${esc(r.nm)}</span><b class="num">${r.n}× · ${coin(16)} ${r.c}</b></div><div class="bar"><i style="width:${r.n/mx*100}%;background:var(--claret)"></i></div></div>`).join('')}
    <span class="tiny faint">Últimos 30 días: ganaste ~${ganadas30} monedas con tareas y objetivos, y gastaste ${gast30}. ${ganadas30&&gast30>ganadas30?'Estás gastando más de lo que ganas: ¡a completar tareas!':'Buen equilibrio entre esfuerzo y premio.'}</span></div>`}
 document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a,id=el.dataset.id,v=el.dataset.v;if(!/^rw/.test(a))return;
   if(a==='rwAsk'){openSheet('canje',id);return}
@@ -1540,7 +1541,7 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!
   if(a==='rwDel'){if(!SH.d.arm){SH.d.arm=1;renderSheet();return}S.deleted=S.deleted||{};S.deleted[id]=Date.now();S.rewards=rws().filter(x=>x.id!==id);save();closeSheet();renderView();return}
   if(a==='rwDo'){const r=rws().find(x=>x.id===id),W=wallet();if(!r||W.bal<r.costo)return;const now=new Date().toISOString();
     rdm().push({id:uid('c'),rewardId:r.id,nombre:r.nombre,emoji:r.emoji,costo:r.costo,ts:now,updatedAt:now});save();closeSheet();renderView();
-    if(typeof celebrate==='function')celebrate(`<span style="font-size:76px;line-height:1">${r.emoji}</span>`,'¡A disfrutar!',`${r.nombre}. Te lo ganaste. Te quedan 🪙 ${W.bal-r.costo}.`);return}
+    if(typeof celebrate==='function')celebrate(`<span style="font-size:76px;line-height:1">${r.emoji}</span>`,'¡A disfrutar!',`${r.nombre}. Te lo ganaste. Te quedan ${W.bal-r.costo} monedas.`);return}
 });
 function vProgress(){
   const T=today(),tI=iso(T),ws=iso(startOfWeek(T));
@@ -1938,8 +1939,13 @@ document.addEventListener('click',e=>{
 });
 function wipe(){const keep=S.settings,del=Object.assign({},S.deleted||{});[...S.tasks,...S.projects,...S.goals].forEach(x=>del[x.id]=Date.now());S=blank();S.settings=keep;S.deleted=del;S.ts=Date.now();save()}
 function quickAdd(){const i=$('#quick');if(!i||!i.value.trim()){if(i)i.focus();return}const p=parseQuick(i.value);const nt=createTask(p);i.value='';renderAll();toast('Añadida',`${nt.titulo} · ${nt.fecha?relDay(nt.fecha)+(diffDays(today(),parseISO(nt.fecha))>6?' ('+fmtD(nt.fecha)+')':''):'sin fecha'}${nt.hora?' '+nt.hora:''}${nt.est?' · '+fmtH(nt.est):''}${nt.prioridad==='P1'?' · Urgente':''}${gcNote(nt)}`,nt.gcalWanted?'warn':'ok',{label:'Editar',fn:()=>openSheet('task',nt.id)})}
-document.addEventListener('input',e=>{
+function pickerHold(el){el.dataset.pend='1';
+  if(el.dataset.bind&&SH){const k=el.dataset.bind;SH.d[k]=el.value||null;if(SH.kind==='new'&&SH.d.tab==='task'&&!SH.d.gcalTouched)SH.d.gcal=gcDefault(SH.d.fecha,SH.d.hora)}}
+document.addEventListener('focusout',e=>{const el=e.target;if(!el||!el.dataset||!el.dataset.pend)return;delete el.dataset.pend;const sh=SH;
+  setTimeout(()=>{if(el.dataset.bind){if(SH&&SH===sh)renderSheet();return}el._commit=true;onInput({target:el});el._commit=false},300)});
+const onInput=e=>{
   const el=e.target;
+  if((el.type==='time'||el.type==='date')&&!el._commit&&(el.dataset.bind||el.dataset.tbind||el.dataset.gbind||el.dataset.pbind)){pickerHold(el);return}
   if(el.id==='tq'){U.q=el.value;saveU();clearTimeout(el._t);el._t=setTimeout(renderView,120);return}
   if(el.dataset.bind&&SH){const k=el.dataset.bind;
     if(el.type==='date'||el.type==='time'){SH.d[k]=el.value||null;if(SH.kind==='new'&&SH.d.tab==='task'&&!SH.d.gcalTouched)SH.d.gcal=gcDefault(SH.d.fecha,SH.d.hora);renderSheet();return}
@@ -1951,7 +1957,8 @@ document.addEventListener('input',e=>{
     t[k]=el.value;t.updatedAt=new Date().toISOString();clearTimeout(el._t);el._t=setTimeout(()=>{if(k==='titulo'&&!t.titulo.trim()){t.titulo='Sin título'}save();renderView();if(k==='titulo'&&t.gcalId&&!t.gcalSeries)gcUpdate(t,{summary:(isDone(t)?'✓ ':'')+'◈ '+t.titulo})},600)}
   if(el.dataset.gbind&&SH){const g=S.goals.find(x=>x.id===SH.arg);if(g){const k=el.dataset.gbind;g[k]=k==='limite'?(el.value||g.limite):(+el.value||0);g.updatedAt=new Date().toISOString();clearTimeout(el._t);el._t=setTimeout(()=>{save();renderView()},400)}}
   if(el.dataset.pbind){const p=projById(el.dataset.id);if(p&&el.value){p[el.dataset.pbind]=el.value;p.updatedAt=new Date().toISOString();save();renderAll()}}
-});
+};
+document.addEventListener('input',onInput);
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&e.target.id==='quick'){e.preventDefault();quickAdd()}
   if(e.key==='Enter'&&e.target.id==='subIn'){e.preventDefault();const b=$('[data-a="subAdd"]');b&&b.click()}
